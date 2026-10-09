@@ -1,0 +1,512 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.1",
+    "script_metadata_hash": "aa2c850e921762f240bc2e8e9886a38c"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "33ba949afffeb735d26d055e491d1fcf",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "aae1e13aeed05961d78983a79e95c779",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"homework-2-corner-and-blob-detection\">Homework 2: Corner and Blob Detection</h1>\n<span class=\"paragraph\">In this assignment you generate simple images of black squares on a white background and detect their corners and blobs.</span>\n<span class=\"paragraph\"><strong>Submission:</strong> submit <code>hw2.zip</code> containing <code>hw1.py</code> and <code>hw2.py</code>. Keep both files in the same folder, because this homework imports your Homework 1 functions.</span>\n<span class=\"paragraph\"><strong>Rules:</strong> use your Homework 1 functions <code>laplacian</code>, <code>convolve2d_full</code>, and <code>harris_corners</code>, plus the provided <code>harris_response(image)</code>. Do not use <code>np.convolve</code>, <code>scipy</code>, or <code>cv2</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "667e1665e33f9421be0e16c25bdde97f",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "38cd9b7b80c89d26a0f62b8d3f69525f",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "4d6e1ea8b9af7e71ff66f549d5126df0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"problem-1-eigenvalues-of-the-structure-matrix\">Problem 1: Eigenvalues of the Structure Matrix</h1>\n<span class=\"paragraph\">In Homework 1, the Harris detector used <marimo-tex class=\"arithmatex\">||(R = \\det(A) - k\\,\\bigl(\\operatorname{trace}(A)\\bigr)^2||)</marimo-tex> without computing the eigenvalues of the structure matrix <marimo-tex class=\"arithmatex\">||(A||)</marimo-tex>. Here you compute them directly.</span>\n<marimo-tex class=\"arithmatex\">||[\nA_1 = \\begin{bmatrix} 3 &amp; 3 \\\\ 3 &amp; 3 \\end{bmatrix}\n\\qquad\nA_2 = \\begin{bmatrix} 8 &amp; 0 \\\\ 0 &amp; 7 \\end{bmatrix}\n\\qquad\nA_3 = \\frac{1}{1000}\\begin{bmatrix} 1 &amp; 0 \\\\ 0 &amp; 1 \\end{bmatrix}\n\\qquad\nA_4 = \\begin{bmatrix} 1 &amp; 3 \\\\ 3 &amp; 1 \\end{bmatrix}\n||]</marimo-tex><ol>\n<li>Enter the four matrices in the cell below.</li>\n<li>Complete <code>classify_feature(structure)</code>. Find the two eigenvalues by solving <marimo-tex class=\"arithmatex\">||(\\det(A - \\lambda I) = 0||)</marimo-tex> yourself (no <code>np.linalg</code>), then return <code>\"corner\"</code>, <code>\"edge\"</code>, <code>\"flat\"</code>, or <code>\"invalid\"</code>.</li>\n<li>In the answer cell, report the eigenvalues and feature type of each matrix, and state any assumptions.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "15e9853e49fc302d8d49005dfaf04173",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "b0241ee9803a1cbb84e2664d1c735c3d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "84f68ebd51552367f88e51c9d5250522",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "A1: edge\nA2: corner\nA3: flat\nA4: edge\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "93001ed559dff1073d155bda0371933f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to Problem 1.</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "4dcc9f14183a834217f655813e092d8b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"problem-2-single-square-image-image-1\">Problem 2: Single-Square Image (Image 1)</h1>\n<h2 id=\"2a-image-generation\">2(a) Image generation</h2>\n<span class=\"paragraph\">Generate two grayscale images: a white background (255) with black squares (0). Coordinates are <marimo-tex class=\"arithmatex\">||((x, y) = (\\text{column}, \\text{row})||)</marimo-tex>.</span>\n<ul>\n<li><strong>Image 1:</strong> 100\u00d7100, one 32\u00d732 square with top-left corner <marimo-tex class=\"arithmatex\">||((30, 40)||)</marimo-tex>.</li>\n<li><strong>Image 2:</strong> 512\u00d7512, four squares:</li>\n</ul>\n<table>\n<thead>\n<tr>\n<th>Square</th>\n<th>Top-left <marimo-tex class=\"arithmatex\">||((x, y)||)</marimo-tex></th>\n<th>Side</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td><marimo-tex class=\"arithmatex\">||((60, 60)||)</marimo-tex></td>\n<td>40</td>\n</tr>\n<tr>\n<td>2</td>\n<td><marimo-tex class=\"arithmatex\">||((180, 300)||)</marimo-tex></td>\n<td>80</td>\n</tr>\n<tr>\n<td>3</td>\n<td><marimo-tex class=\"arithmatex\">||((300, 100)||)</marimo-tex></td>\n<td>120</td>\n</tr>\n<tr>\n<td>4</td>\n<td><marimo-tex class=\"arithmatex\">||((340, 340)||)</marimo-tex></td>\n<td>140</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Complete <code>make_square_image</code> below.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "fd58372ffa7dc8b62c2a7ae7255f22d1",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "749140a2f22692791f0b9cad74c83f76",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Visualize the generated images:</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "c7f07d0743a1cf51f9db2593605a4653",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "cde2c3b3d012462ff842894e99fad06e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2b-gaussian-smoothing\">2(b) Gaussian smoothing</h2>\n<span class=\"paragraph\">Smooth Image 1 with <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex>. Complete:</span>\n<ul>\n<li><code>gaussian_kernel_1d(sigma)</code>: a 1D Gaussian sampled at offsets <marimo-tex class=\"arithmatex\">||(-r, \\dots, r||)</marimo-tex>, where <marimo-tex class=\"arithmatex\">||(r = \\lceil 3\\sigma \\rceil||)</marimo-tex>, normalized to sum to 1.</li>\n<li><code>convolve_same(image, kernel)</code>: use <code>convolve2d_full</code>, then crop so the output has the same size as <code>image</code>, with the kernel centred on each pixel. The border must not create fake edges: smoothing a constant image should return the same image.</li>\n<li><code>gaussian_smooth(image, sigma)</code>: 2D Gaussian smoothing. Tip: apply the 1D kernel along the rows, then along the columns. This is much faster than a full 2D kernel.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "8d3900d7122484ff8220f58b25d5769b",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "b10646e00d75a0b344f3dd846e2314b2",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "84119af44148a5ae9f57701dea11a057",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2c-harris-corners\">2(c) Harris corners</h2>\n<span class=\"paragraph\">Complete <code>corners_at_scale</code>: run <code>harris_corners</code> on each smoothed image. Choose <code>threshold</code> and <code>max_corners</code> so that <strong>exactly the 4 corners</strong> of the square are found at every <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>.</span>\n<span class=\"paragraph\"><em>Hint: first check what <code>harris_corners</code> detects on a black square on a white background.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "4a2fec2d77dc5c1783bdaefdbae04e26",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "8bf1db9bb8413a877c6c5ba09cb12875",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "769c3e13645e4c7280f9cecee068b046",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2d-laplacian-of-gaussian-log\">2(d) Laplacian of Gaussian (LoG)</h2>\n<ul>\n<li><code>log_response(image, sigma)</code>: smooth the image, then apply <code>laplacian</code> with <code>convolve_same</code>.</li>\n<li><code>local_extrema(response, fraction)</code>: return the <code>(row, column)</code> of every pixel (skip the 1-pixel border) where<ul>\n<li><marimo-tex class=\"arithmatex\">||(|\\text{response}|||)</marimo-tex> is at least that of all 8 neighbours (ties count, tolerance <marimo-tex class=\"arithmatex\">||(10^{-9} \\max|\\text{response}|||)</marimo-tex>), and</li>\n<li><marimo-tex class=\"arithmatex\">||(|\\text{response}| \\ge||)</marimo-tex> <code>fraction</code> \u00d7 <marimo-tex class=\"arithmatex\">||(\\max|\\text{response}|||)</marimo-tex>.</li>\n</ul>\n</li>\n</ul>\n<span class=\"paragraph\">Choose a default value for <code>fraction</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "395bcb5c8a7cdb9a94df6a0e86e1903c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "8a84a60e2a3069da091a24415c4a85ab",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "4fcbeeaed503254f3d8c739abdcb2b5d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2e-difference-of-gaussian-dog\">2(e) Difference of Gaussian (DoG)</h2>\n<ul>\n<li><code>dog_response(image, sigma, k=1.4)</code>: <marimo-tex class=\"arithmatex\">||(G_{k\\sigma} * I - G_\\sigma * I||)</marimo-tex>.</li>\n<li><code>dog_log_scale(dog, log)</code>: the number <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> that best fits DoG \u2248 <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> \u00d7 LoG, i.e. minimizes <marimo-tex class=\"arithmatex\">||(\\sum (D - c\\,L)^2||)</marimo-tex>.</li>\n</ul>\n<span class=\"paragraph\"><strong>In the answer cell:</strong></span>\n<ol>\n<li>Compare the DoG and LoG extrema.</li>\n<li>The table shows <marimo-tex class=\"arithmatex\">||(c \\approx (k-1)\\sigma^2||)</marimo-tex>. Explain why, using <marimo-tex class=\"arithmatex\">||(\\partial G_\\sigma / \\partial \\sigma = \\sigma \\nabla^2 G_\\sigma||)</marimo-tex>.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "7bab61c7ee6556beeca56830ec793b8f",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "c964509a3c87764b2f6969ec06499106",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "71770f505e50c42d1d8ce9de291913a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 2(e).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "dde8c563489b1c8e9aa6072ae259f1a9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2f-corner-drift\">2(f) Corner drift</h2>\n<span class=\"paragraph\">Set <code>true_corners_image_1</code> to the 4 corner pixels of the square in Image 1, as <code>(row, column)</code>. The table shows how far the strongest Harris corner from 2(c) is from the nearest true corner.</span>\n<span class=\"paragraph\"><strong>In the answer cell:</strong></span>\n<ol>\n<li>Give your <code>threshold</code>, <code>max_corners</code>, and <code>fraction</code>, with a one-sentence reason for each.</li>\n<li>Explain how you handled the image border in 2(b) and 2(c).</li>\n<li>How does the distance change with <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>? In which direction does the corner move, and why?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "32bd8c75f3075e65dd80c1c150b3023c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "464e979e23e2dad6d1a2cca74838c4bf",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "f27c8940569429feb806d263e76dc28d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 2(f).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "42dbabb8420726812268a4ecb7b47f10",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"problem-3-multi-scale-blob-and-corner-detection-image-2\">Problem 3: Multi-Scale Blob and Corner Detection (Image 2)</h1>\n<span class=\"paragraph\">Reuse your Problem 2 functions on Image 2.</span>\n<h2 id=\"3a-gaussian-pyramid\">3(a) Gaussian pyramid</h2>\n<span class=\"paragraph\">For each <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex>, smooth Image 2, then downsample the result by a factor of <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> (i.e. 1, 2, 4, 8).</span>\n<ul>\n<li><code>downsample(image, factor)</code>: keep every <code>factor</code>-th row and column, starting at <code>[0, 0]</code>.</li>\n<li><code>build_scale_pyramid(image, sigmas)</code>: return <code>(smoothed, levels)</code>, the full-size smoothed images and their downsampled versions.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "f541390192ce499c1630c45e173270b5",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "fba1b02e71fdedaa12f328dfafe9d838",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "559aa116312684687bddb5dfcc8bdc73",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong> briefly describe how the levels differ (e.g., how edges and corners blur or disappear).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "80d7bf96c4412eadd012bbab43d4b5ac",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 3(a).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "00f17b549ffd4797447035028c77ff57",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3b-harris-corners-at-multiple-scales\">3(b) Harris corners at multiple scales</h2>\n<span class=\"paragraph\">Compare Harris on (i) the full-size smoothed images and (ii) the pyramid levels.</span>\n<ul>\n<li><code>to_original(points, factor)</code>: map <code>(row, column)</code> points in a level back to the original image.</li>\n<li><code>image_2_corners(image)</code>: call <code>harris_corners</code> with one <code>threshold</code> and <code>max_corners</code> that works for every <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> and level. Return only corners of the squares (Image 2 has 16).</li>\n<li><code>corner_strengths(image, points)</code>: the CRF value at each point, using <code>harris_response</code>.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "3c89b79b130e145a9d941a048ee9afa4",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "3740e73d79c34c5f783b944a68edb832",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "09ec27710f97800f2baa896e7c74230d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong></span>\n<ol>\n<li>How do corner locations, counts, and strengths differ between (i) and (ii)?</li>\n<li>Why are the pyramid CRF values larger?</li>\n<li>Why do the two approaches disagree at <marimo-tex class=\"arithmatex\">||(\\sigma = 8||)</marimo-tex>?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "a9fe008caa110c5d562596967fd644a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 3(b).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "a85e06fcaf946be0cb6bc09a6d4fc482",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3c-log-and-dog-on-the-gaussian-pyramid\">3(c) LoG and DoG on the Gaussian pyramid</h2>\n<span class=\"paragraph\">Apply LoG and DoG to each pyramid level with <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex> (in level pixels) to find blob centres. First decide: is the centre of a dark square a <strong>maximum</strong> or a <strong>minimum</strong> of the response?</span>\n<ul>\n<li><code>effective_sigma(level_sigma, factor, sigma)</code>: the total scale in original pixels, <marimo-tex class=\"arithmatex\">||(\\sigma_\\text{eff} = \\sqrt{\\sigma_\\ell^2 + (f\\sigma)^2}||)</marimo-tex>.</li>\n<li><code>normalized_log(level, level_sigma, factor, sigma)</code>: <marimo-tex class=\"arithmatex\">||(s^2 \\times||)</marimo-tex> <code>log_response(level, sigma)</code> with <marimo-tex class=\"arithmatex\">||(s = \\sigma_\\text{eff} / f||)</marimo-tex>, so that different scales can be compared.</li>\n<li><code>dark_blob_candidates(response)</code>: pixels (skip the border) that are local extrema of the sign you chose (compared with all 8 neighbours, ties allowed), with magnitude at least <marimo-tex class=\"arithmatex\">||(10^{-6}||)</marimo-tex> \u00d7 the largest magnitude of that sign.</li>\n<li><code>pyramid_blobs(levels, factors, sigmas, method=\"log\", k=1.4)</code>: for every level and <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>, return rows <code>(row, column, sigma_eff, strength)</code> in original coordinates.<ul>\n<li>Response: <code>normalized_log</code> for LoG, <code>dog_response / (k - 1)</code> for DoG.</li>\n<li>Strength: the magnitude of the response.</li>\n<li>The level with factor <marimo-tex class=\"arithmatex\">||(f||)</marimo-tex> has <marimo-tex class=\"arithmatex\">||(\\sigma_\\ell = f||)</marimo-tex>.</li>\n</ul>\n</li>\n<li><code>suppress_overlaps(blobs, fraction)</code>: go from strongest to weakest blob, and keep a blob only if its centre is farther than <marimo-tex class=\"arithmatex\">||(\\sqrt{2}\\max(\\sigma_\\text{eff}, \\sigma_\\text{eff}')||)</marimo-tex> from every blob already kept. Return the kept blobs with strength at least <code>fraction</code> \u00d7 the strongest.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "b16c60f028f0a2fd70ae0e24cda3166e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "e1bdef40837e850f39497db72cd72307",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "8c3553130a443f09b0187bfea14e5a27",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "74b90570fafad7991cb8bb41b4df1b8d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong></span>\n<ol>\n<li>Which <marimo-tex class=\"arithmatex\">||(\\sigma_\\text{eff}||)</marimo-tex> is selected for each square, and how does it relate to the side length?</li>\n<li>Do LoG and DoG select the same blobs?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LJZf",
+      "code_hash": "e38d2bccadb2fee5debf551f36136c76",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 3(c).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "urSm",
+      "code_hash": "b6c6da9b79a39eb3f477390ccf0af22f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3d-mapping-and-visualization\">3(d) Mapping and visualization</h2>\n<span class=\"paragraph\">In the cell below, draw all detections on Image 2 in original coordinates:</span>\n<ul>\n<li><strong>Left:</strong> Harris corners from (i) and (ii), with a different colour or marker for each <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>.</li>\n<li><strong>Right:</strong> LoG and DoG blobs as circles of radius <marimo-tex class=\"arithmatex\">||(r = c\\,\\sigma_\\text{eff}||)</marimo-tex>, where <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> is a constant you choose for visibility.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "jxvo",
+      "code_hash": "e25f4ba11253415ade5767eb7eed30da",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "mWxS",
+      "code_hash": "621306f268b32745579a4cbba9c6abb7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong> what does the overlay show about detecting features at a single scale versus across scales?</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "CcZR",
+      "code_hash": "4672818a1be6b060ea8bf4b689a4db84",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 3(d).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
