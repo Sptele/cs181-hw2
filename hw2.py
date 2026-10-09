@@ -123,19 +123,18 @@ def classify_feature(math):
         # l^2 - l(tr(A)) + det(A)
 
         tr = structure[0][0] + structure[1][1]
-        det = structure[0][0] * structure[1][1] - structure[1][0] * structure[0][1]
+        det = structure[0][0] * structure[1][1] - structure[0][1]**2
     
         e1 = 0.5 * (tr + math.sqrt(tr**2 - 4*det))
         e2 = 0.5 * (tr - math.sqrt(tr**2 - 4*det))
 
         if e1 < 0 or e2 < 0:
             return "invalid"
-
-        if e1 >= threshold and e2 >= threshold:
+        elif e1 > threshold and e2 > threshold:
             return "corner"
-        elif e1 >= threshold or e2 >= threshold:
+        elif e1 > threshold or e2 > threshold:
             return "edge"
-        elif e1 < threshold and e2 < threshold:
+        elif e1 <= threshold and e2 <= threshold:
             return "flat"
 
         return "invalid"
@@ -158,6 +157,8 @@ def _(classify_feature, structure_1, structure_2, structure_3, structure_4):
 @app.cell
 def _(mo):
     mo.md(r"""
+    **Your answer to 1.**
+
     A1:
     - eigenvalues: 6, 0
     - Edge
@@ -184,17 +185,17 @@ def _(mo):
 
     ## 2(a) Image generation
 
-    Generate two grayscale images: a white background (255) with black squares (0). Coordinates are \((x, y) = (\text{column}, \text{row})\).
+    Generate two grayscale images: a white background (255) with black squares (0). Coordinates are $(x, y) = (\text{column}, \text{row})$
 
-    - **Image 1:** 100×100, one 32×32 square with top-left corner \((30, 40)\).
+    - **Image 1:** 100×100, one 32×32 square with top-left corner $(30, 40)$.
     - **Image 2:** 512×512, four squares:
 
-    | Square | Top-left \((x, y)\) | Side |
+    | Square | Top-left $(x, y)$ | Side |
     |---|---|---|
-    | 1 | \((60, 60)\) | 40 |
-    | 2 | \((180, 300)\) | 80 |
-    | 3 | \((300, 100)\) | 120 |
-    | 4 | \((340, 340)\) | 140 |
+    | 1 | $(60, 60)$ | 40 |
+    | 2 | $(180, 300)$ | 80 |
+    | 3 | $(300, 100)$ | 120 |
+    | 4 | $(340, 340)$ | 140 |
 
     Complete `make_square_image` below.
     """)
