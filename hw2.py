@@ -117,16 +117,17 @@ def classify_feature(math):
         # EDIT BELOW: compute both eigenvalues of [[a, b], [b, c]], then use
         # them to decide and return the feature type or invalid.
 
-        # (a-L)(b-L)-b*c = 0
-        # ab -al -bl +l^2 - bc  =0
-
-        # l^2 - l(tr(A)) + det(A)
 
         tr = structure[0][0] + structure[1][1]
         det = structure[0][0] * structure[1][1] - structure[0][1]**2
+
+        disc = tr**2 - 4*det
+
+        if disc < 0:
+            return "invalid"
     
-        e1 = 0.5 * (tr + math.sqrt(tr**2 - 4*det))
-        e2 = 0.5 * (tr - math.sqrt(tr**2 - 4*det))
+        e1 = 0.5 * (tr + math.sqrt(disc))
+        e2 = 0.5 * (tr - math.sqrt(disc))
 
         if e1 < 0 or e2 < 0:
             return "invalid"
@@ -137,7 +138,7 @@ def classify_feature(math):
         elif e1 <= threshold and e2 <= threshold:
             return "flat"
 
-        return "invalid"
+        return "flat"
 
     return (classify_feature,)
 
