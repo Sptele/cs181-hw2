@@ -128,6 +128,9 @@ def classify_feature(math):
         e1 = 0.5 * (tr + math.sqrt(tr**2 - 4*det))
         e2 = 0.5 * (tr - math.sqrt(tr**2 - 4*det))
 
+        if e1 < 0 or e2 < 0:
+            return "invalid"
+
         if e1 >= threshold and e2 >= threshold:
             return "corner"
         elif e1 >= threshold or e2 >= threshold:
@@ -155,9 +158,21 @@ def _(classify_feature, structure_1, structure_2, structure_3, structure_4):
 @app.cell
 def _(mo):
     mo.md(r"""
-    **Your answer to Problem 1.**
+    A1:
+    - eigenvalues: 6, 0
+    - Edge
 
-    *Double-click this cell to write your answer. You may replace everything here.*
+    A2:
+    - eigenvalues: 8, 7
+    - Corner
+
+    A3:
+    - eigenvalues: 0.001 (multiplicity 2)
+    - Flat
+
+    A4:
+    - eigenvalues: 4, -2
+    - Invalid
     """)
     return
 
