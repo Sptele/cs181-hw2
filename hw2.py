@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.25.1"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -125,7 +125,7 @@ def classify_feature(math):
 
         if disc < 0:
             return "invalid"
-    
+
         e1: float = (tr + math.sqrt(disc))/2
         e2: float = (tr - math.sqrt(disc))/2
 
@@ -304,7 +304,7 @@ def _(convolve2d_full, math, np):
 
         for i in range(image.shape[0]):
             smoothed[i] = convolve_same(image[i], g)
-    
+
         for j in range(image.shape[1]):
             smoothed[:, j] = convolve_same(image[:, j], g)
 
@@ -314,7 +314,7 @@ def _(convolve2d_full, math, np):
 
 
 @app.cell(hide_code=True)
-def _(gaussian_smooth, image_1, plt):
+def _(gaussian_smooth, image_1, mo, plt):
     sigmas = (1, 2, 4, 8)
     try:
         smoothed_by_sigma = {sigma: gaussian_smooth(image_1, sigma) for sigma in sigmas}
@@ -326,12 +326,11 @@ def _(gaussian_smooth, image_1, plt):
             _axis.axis("off")
         plt.tight_layout()
         _display = plt.gcf()
-    # except Exception as error:
-    #     smoothed_by_sigma = None
-    #     smoothing_error = str(error)
-    #     _display = mo.md(f"Gaussian smoothing is not ready: {error}")
-    finally:
-        _display
+    except Exception as error:
+        smoothed_by_sigma = None
+        smoothing_error = str(error)
+        _display = mo.md(f"Gaussian smoothing is not ready: {error}")
+    _display
     return sigmas, smoothed_by_sigma, smoothing_error
 
 
@@ -352,7 +351,7 @@ def _(harris_corners):
     def corners_at_scale(smoothed):
         """Return the Harris corners of a smoothed image as (row, column)."""
         # EDIT BELOW: call harris_corners with your choice of parameters.
-        corners = harris_corners(smoothed, threshold=..., max_corners=...)
+        corners = harris_corners(smoothed, threshold=10, max_corners=5)
 
         return corners
 
