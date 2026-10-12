@@ -126,8 +126,8 @@ def classify_feature(math):
         if disc < 0:
             return "invalid"
     
-        e1 = 0.5 * (tr + math.sqrt(disc))
-        e2 = 0.5 * (tr - math.sqrt(disc))
+        e1: float = (tr + math.sqrt(disc))/2
+        e2: float = (tr - math.sqrt(disc))/2
 
         if e1 < 0 or e2 < 0:
             return "invalid"
@@ -204,7 +204,7 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(np):
     def make_square_image(size, squares):
         """Return a size-by-size white image with black squares.
 
@@ -212,13 +212,18 @@ def _():
         is the top-left pixel of a square and side is its side length.
         """
         # EDIT BELOW: set the pixels of image.
-        image = ...
+        image = np.full((size, size), 255, dtype=float)
+
+        for j, i, l in squares:
+            for ki in range(l):
+                for kj in range(l):
+                    image[i+ki, j+kj] = 0
 
         return image
 
     # EDIT BELOW: list the squares of each image as (x, y, side) tuples.
-    image_1 = make_square_image(100, [])
-    image_2 = make_square_image(512, [])
+    image_1 = make_square_image(100, [(30, 40, 32)])
+    image_2 = make_square_image(512, [(60, 60, 40), (180, 300, 80), (300, 100, 120), (340, 340, 140)])
     return image_1, image_2
 
 
@@ -255,9 +260,9 @@ def _(mo):
     mo.md(r"""
     ## 2(b) Gaussian smoothing
 
-    Smooth Image 1 with \(\sigma \in \{1, 2, 4, 8\}\). Complete:
+    Smooth Image 1 with $\sigma \in \{1, 2, 4, 8\}$. Complete:
 
-    - `gaussian_kernel_1d(sigma)`: a 1D Gaussian sampled at offsets \(-r, \dots, r\), where \(r = \lceil 3\sigma \rceil\), normalized to sum to 1.
+    - `gaussian_kernel_1d(sigma)`: a 1D Gaussian sampled at offsets $-r, \dots, r$, where $r = \lceil 3\sigma \rceil$, normalized to sum to 1.
     - `convolve_same(image, kernel)`: use `convolve2d_full`, then crop so the output has the same size as `image`, with the kernel centred on each pixel. The border must not create fake edges: smoothing a constant image should return the same image.
     - `gaussian_smooth(image, sigma)`: 2D Gaussian smoothing. Tip: apply the 1D kernel along the rows, then along the columns. This is much faster than a full 2D kernel.
     """)
@@ -265,25 +270,43 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(convolve2d_full, math, np):
     def gaussian_kernel_1d(sigma):
         """Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
         # EDIT BELOW: compute the radius, sample g at the integer offsets, normalize.
-        kernel = ...
 
-        return kernel
+        def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
+
+        k_radius = math.ceil(3*sigma)
+        k_len = 2*k_radius+1
+
+        kernel = np.zeros(k_len, dtype=float)
+
+        for i in range(kernel.shape):
+            kernel[i] = g(i-k_radius)
+
+        return kernel / kernel.sum()
 
     def convolve_same(image, kernel):
         """Return the same-size convolution of image with an odd-sized 2D kernel."""
         # EDIT BELOW: use convolve2d_full, then crop to image.shape.
-        same = ...
+        r = convolve2d_full(image, kernel)
 
-        return same
+        return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
+
 
     def gaussian_smooth(image, sigma):
         """Return image smoothed by a 2D Gaussian of standard deviation sigma."""
         # EDIT BELOW: smooth with gaussian_kernel_1d and convolve_same.
-        smoothed = ...
+        g = gaussian_kernel_1d(sigma)
+
+        smoothed = np.zeros(image.shape, dtype=float)
+
+        for i in range(image.shape[0]):
+            smoothed[i] = convolve_same(image[i], g)
+    
+        for j in range(image.shape[1]):
+            smoothed[:, j] = convolve_same(image[:, j], g)
 
         return smoothed
 
@@ -291,7 +314,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(gaussian_smooth, image_1, mo, plt):
+def _(gaussian_smooth, image_1, plt):
     sigmas = (1, 2, 4, 8)
     try:
         smoothed_by_sigma = {sigma: gaussian_smooth(image_1, sigma) for sigma in sigmas}
@@ -303,11 +326,12 @@ def _(gaussian_smooth, image_1, mo, plt):
             _axis.axis("off")
         plt.tight_layout()
         _display = plt.gcf()
-    except Exception as error:
-        smoothed_by_sigma = None
-        smoothing_error = str(error)
-        _display = mo.md(f"Gaussian smoothing is not ready: {error}")
-    _display
+    # except Exception as error:
+    #     smoothed_by_sigma = None
+    #     smoothing_error = str(error)
+    #     _display = mo.md(f"Gaussian smoothing is not ready: {error}")
+    finally:
+        _display
     return sigmas, smoothed_by_sigma, smoothing_error
 
 
@@ -316,7 +340,7 @@ def _(mo):
     mo.md(r"""
     ## 2(c) Harris corners
 
-    Complete `corners_at_scale`: run `harris_corners` on each smoothed image. Choose `threshold` and `max_corners` so that **exactly the 4 corners** of the square are found at every \(\sigma\).
+    Complete `corners_at_scale`: run `harris_corners` on each smoothed image. Choose `threshold` and `max_corners` so that **exactly the 4 corners** of the square are found at every $\sigma$.
 
     *Hint: first check what `harris_corners` detects on a black square on a white background.*
     """)
