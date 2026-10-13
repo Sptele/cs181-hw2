@@ -150,7 +150,7 @@
     },
     {
       "id": "emfo",
-      "code_hash": "388e20a121d925f3b995d2af6139622f",
+      "code_hash": "0b972526617b5e13f93c5564599b563c",
       "outputs": [
         {
           "type": "data",
@@ -172,7 +172,14 @@
           }
         }
       ],
-      "console": []
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "(5, 5)\n(5, 5)\n(5, 5)\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "nWHF",
@@ -198,7 +205,14 @@
           }
         }
       ],
-      "console": []
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "(412, 412)\n(412, 412)\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "ZHCJ",
@@ -328,7 +342,14 @@
           }
         }
       ],
-      "console": []
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "(516, 516)\n(260, 260)\n(132, 132)\n(68, 68)\n(36, 36)\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "aLJB",
@@ -381,6 +402,12 @@
         }
       ],
       "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "(302, 402)\n(302, 402)\n(302, 402)\n(302, 402)\n(302, 402)\n",
+          "mimetype": "text/plain"
+        },
         {
           "type": "streamMedia",
           "name": "media",

@@ -41,18 +41,18 @@ def _(mo):
 
 @app.function(hide_code=True)
 def homework1_definitions():
-    """Load and cache Homework 1 helpers for importable solution functions."""
-    from contextlib import redirect_stdout
-    from io import StringIO
-    from unittest.mock import patch
-    import marimo
-    import matplotlib.pyplot as plt
-    import hw1
+	"""Load and cache Homework 1 helpers for importable solution functions."""
+	from contextlib import redirect_stdout
+	from io import StringIO
+	from unittest.mock import patch
+	import marimo
+	import matplotlib.pyplot as plt
+	import hw1
 
-    if not hasattr(hw1, "_hw2_definitions"):
-        with patch.object(marimo.output, "replace"), patch.object(marimo.output, "append"), patch.object(plt, "show"), redirect_stdout(StringIO()):
-            _, hw1._hw2_definitions = hw1.app.run()
-    return hw1._hw2_definitions
+	if not hasattr(hw1, "_hw2_definitions"):
+		with patch.object(marimo.output, "replace"), patch.object(marimo.output, "append"), patch.object(plt, "show"), redirect_stdout(StringIO()):
+			_, hw1._hw2_definitions = hw1.app.run()
+	return hw1._hw2_definitions
 
 
 @app.cell
@@ -151,31 +151,33 @@ def _(mo):
 
 
 @app.cell
-def classify_feature(math):
+def classify_feature(np):
     def classify_feature(structure, threshold=1.0):
-        """Return 'corner', 'edge', 'flat' or 'invalid' for a 2x2 structure matrix."""
+    	"""Return 'corner', 'edge', 'flat' or 'invalid' for a 2x2 structure matrix."""
 
-        tr = structure[0][0] + structure[1][1]
-        det = structure[0][0] * structure[1][1] - structure[0][1]**2
+    	# tr = structure[0][0] + structure[1][1]
+    	# det = structure[0][0] * structure[1][1] - structure[0][1]**2
 
-        disc = tr**2 - 4*det
+    	# disc = tr**2 - 4*det
 
-        if disc < 0:
-            return "invalid"
+    	# if disc < 0:
+    	#     return "invalid"
 
-        e1: float = (tr + math.sqrt(disc))/2
-        e2: float = (tr - math.sqrt(disc))/2
+    	# e1: float = (tr + math.sqrt(disc))/2
+    	# e2: float = (tr - math.sqrt(disc))/2
 
-        if e1 < 0 or e2 < 0:
-            return "invalid"
-        elif e1 > threshold and e2 > threshold:
-            return "corner"
-        elif e1 > threshold or e2 > threshold:
-            return "edge"
-        elif e1 <= threshold and e2 <= threshold:
-            return "flat"
+    	e1, e2 = np.linalg.eigvals(structure)
 
-        return "flat"
+    	if e1 < 0 or e2 < 0:
+    		return "invalid"
+    	elif e1 > threshold and e2 > threshold:
+    		return "corner"
+    	elif e1 > threshold or e2 > threshold:
+    		return "edge"
+    	elif e1 <= threshold and e2 <= threshold:
+    		return "flat"
+
+    	return "flat"
 
     return (classify_feature,)
 
@@ -183,12 +185,12 @@ def classify_feature(math):
 @app.cell(hide_code=True)
 def _(classify_feature, structure_1, structure_2, structure_3, structure_4):
     try:
-        print("A1:", classify_feature(structure_1))
-        print("A2:", classify_feature(structure_2))
-        print("A3:", classify_feature(structure_3))
-        print("A4:", classify_feature(structure_4))
+    	print("A1:", classify_feature(structure_1))
+    	print("A2:", classify_feature(structure_2))
+    	print("A3:", classify_feature(structure_3))
+    	print("A4:", classify_feature(structure_4))
     except Exception as error:
-        print(f"Problem 1 test is not ready: {error}")
+    	print(f"Problem 1 test is not ready: {error}")
     return
 
 
@@ -219,20 +221,20 @@ def _(mo):
 @app.cell
 def make_square_image(np):
     def make_square_image(size, squares):
-        """Return a size-by-size white image with black squares.
+    	"""Return a size-by-size white image with black squares.
 
-        squares is a list of (x, y, side) tuples, where (x, y) = (column, row)
-        is the top-left pixel of a square and side is its side length.
-        """
-        # EDIT BELOW: set the pixels of image.
-        image = np.full((size, size), 255, dtype=float)
+    	squares is a list of (x, y, side) tuples, where (x, y) = (column, row)
+    	is the top-left pixel of a square and side is its side length.
+    	"""
+    	# EDIT BELOW: set the pixels of image.
+    	image = np.full((size, size), 255, dtype=float)
 
-        for j, i, l in squares:
-            for ki in range(l):
-                for kj in range(l):
-                    image[i+ki, j+kj] = 0
+    	for j, i, l in squares:
+    		for ki in range(l):
+    			for kj in range(l):
+    				image[i+ki, j+kj] = 0
 
-        return image
+    	return image
 
     return (make_square_image,)
 
@@ -244,7 +246,7 @@ def homework_squares(make_square_image):
     	(30, 40, 32)
     ]
     image_2_squares = [
-        (60, 60, 40), (180, 300, 80), (300, 100, 120), (340, 340, 140)
+    	(60, 60, 40), (180, 300, 80), (300, 100, 120), (340, 340, 140)
     ]
     image_1 = make_square_image(100, image_1_squares)
     image_2 = make_square_image(512, image_2_squares)
@@ -262,19 +264,19 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(image_1, image_2, mo, plt):
     try:
-        _figure, _axes = plt.subplots(1, 2, figsize=(8, 4))
-        for _axis, _image, _title in (
-            (_axes[0], image_1, "Image 1: single square"),
-            (_axes[1], image_2, "Image 2: four squares"),
-        ):
-            _axis.imshow(_image, cmap="gray", vmin=0, vmax=255)
-            _axis.set_title(_title)
-            _axis.set_xticks([])
-            _axis.set_yticks([])
-        plt.tight_layout()
-        _display = plt.gcf()
+    	_figure, _axes = plt.subplots(1, 2, figsize=(8, 4))
+    	for _axis, _image, _title in (
+    		(_axes[0], image_1, "Image 1: single square"),
+    		(_axes[1], image_2, "Image 2: four squares"),
+    	):
+    		_axis.imshow(_image, cmap="gray", vmin=0, vmax=255)
+    		_axis.set_title(_title)
+    		_axis.set_xticks([])
+    		_axis.set_yticks([])
+    	plt.tight_layout()
+    	_display = plt.gcf()
     except Exception as error:
-        _display = mo.md(f"2(a) display is not ready: {error}")
+    	_display = mo.md(f"2(a) display is not ready: {error}")
     _display
     return
 
@@ -296,20 +298,20 @@ def _(mo):
 @app.cell
 def gaussian_kernel_1d(math):
     def gaussian_kernel_1d(sigma):
-        """Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
-        import numpy as np
+    	"""Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
+    	import numpy as np
 
-        def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
+    	def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
 
-        k_radius = math.ceil(3*sigma)
-        k_len = 2*k_radius+1
+    	k_radius = math.ceil(3*sigma)
+    	k_len = 2*k_radius+1
 
-        kernel = np.zeros(k_len, dtype=float)
+    	kernel = np.zeros(k_len, dtype=float)
 
-        for i in range(len(kernel)):
-            kernel[i] = g(i-k_radius)
+    	for i in range(len(kernel)):
+    		kernel[i] = g(i-k_radius)
 
-        return kernel / kernel.sum()
+    	return kernel / kernel.sum()
 
     return (gaussian_kernel_1d,)
 
@@ -325,15 +327,16 @@ def _(mo):
 @app.cell
 def gaussian_kernel_2d(gaussian_kernel_1d):
     def gaussian_kernel_2d(sigma):
-        """Return the normalized 2D Gaussian kernel using gaussian_kernel_1d."""
-        import numpy as np
+    	"""Return the normalized 2D Gaussian kernel using gaussian_kernel_1d."""
+    	import numpy as np
 
-        g = gaussian_kernel_1d(sigma)
+    	g = gaussian_kernel_1d(sigma)
 
-        # EDIT BELOW: construct the 2D kernel from your 1D Gaussian kernel.
-        kernel = np.outer(g, g) # are we allowed to use this?
+    	# EDIT BELOW: construct the 2D kernel from your 1D Gaussian kernel.
+    	kernel = np.outer(g, g) # are we allowed to use this?
 
-        return kernel / kernel.sum()
+
+    	return kernel / kernel.sum()
 
     return (gaussian_kernel_2d,)
 
@@ -348,16 +351,18 @@ def _(mo):
 
 @app.function
 def convolve_same(image, kernel):
-    """Return the same-size convolution of image with an odd-sized 2D kernel."""
-    import numpy as np
-    convolve2d_full = homework1_definitions()["convolve2d_full"]
+	"""Return the same-size convolution of image with an odd-sized 2D kernel."""
+	import numpy as np
+	convolve2d_full = homework1_definitions()["convolve2d_full"]
 
-    # EDIT BELOW: use convolve2d_full, then crop to image.shape.
-    padded = np.pad(image, (((kernel.shape[0])//2, (kernel.shape[0])//2), (kernel.shape[1]//2, kernel.shape[1]//2)), mode="edge")
+	# EDIT BELOW: use convolve2d_full, then crop to image.shape.
+	padded = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
 
-    r = convolve2d_full(padded, kernel)
-	
-    return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
+	# how large is either side of the kernel?
+
+	r = convolve2d_full(padded, kernel)
+
+	return r[kernel.shape[0]:kernel.shape[0] + image.shape[0]-1, kernel.shape[1]:kernel.shape[1] + image.shape[1]-1]
 
 
 @app.cell(hide_code=True)
@@ -371,14 +376,14 @@ def _(mo):
 @app.cell
 def gaussian_smooth(gaussian_kernel_2d):
     def gaussian_smooth(image, sigma):
-        """Return image smoothed by a 2D Gaussian of standard deviation sigma."""
-        # EDIT BELOW: smooth with gaussian_kernel_1d and convolve_same.
+    	"""Return image smoothed by a 2D Gaussian of standard deviation sigma."""
+    	# EDIT BELOW: smooth with gaussian_kernel_1d and convolve_same.
 
-        g = gaussian_kernel_2d(sigma)
+    	g = gaussian_kernel_2d(sigma)
 
-        smoothed = convolve_same(image, g)
+    	smoothed = convolve_same(image, g)
 
-        return smoothed
+    	return smoothed
 
     return (gaussian_smooth,)
 
@@ -387,19 +392,19 @@ def gaussian_smooth(gaussian_kernel_2d):
 def _(gaussian_smooth, image_1, mo, plt):
     sigmas = (1, 2, 4, 8)
     try:
-        smoothed_by_sigma = {sigma: gaussian_smooth(image_1, sigma) for sigma in sigmas}
-        smoothing_error = None
-        _figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
-        for _axis, _sigma in zip(_axes, sigmas):
-            _axis.imshow(smoothed_by_sigma[_sigma], cmap="gray", vmin=0, vmax=255)
-            _axis.set_title(f"Smoothed, σ = {_sigma}")
-            _axis.axis("off")
-        plt.tight_layout()
-        _display = plt.gcf()
+    	smoothed_by_sigma = {sigma: gaussian_smooth(image_1, sigma) for sigma in sigmas}
+    	smoothing_error = None
+    	_figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
+    	for _axis, _sigma in zip(_axes, sigmas):
+    		_axis.imshow(smoothed_by_sigma[_sigma], cmap="gray", vmin=0, vmax=255)
+    		_axis.set_title(f"Smoothed, σ = {_sigma}")
+    		_axis.axis("off")
+    	plt.tight_layout()
+    	_display = plt.gcf()
     except Exception as error:
-        smoothed_by_sigma = None
-        smoothing_error = str(error)
-        _display = mo.md(f"Gaussian smoothing is not ready: {error}")
+    	smoothed_by_sigma = None
+    	smoothing_error = str(error)
+    	_display = mo.md(f"Gaussian smoothing is not ready: {error}")
     _display
     return sigmas, smoothed_by_sigma, smoothing_error
 
@@ -436,14 +441,14 @@ def _(mo):
 
 @app.function
 def corners_at_scale(smoothed, threshold=..., max_corners=...):
-    """Return the Harris corners of a smoothed image as (row, column)."""
-    import numpy as np
-    harris_corners = homework1_definitions()["harris_corners"]
+	"""Return the Harris corners of a smoothed image as (row, column)."""
+	import numpy as np
+	harris_corners = homework1_definitions()["harris_corners"]
 
-    # EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
-    corners = ...
+	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+	corners = ...
 
-    return corners
+	return corners
 
 
 @app.cell(hide_code=True)
@@ -457,24 +462,24 @@ def _(
     smoothing_error,
 ):
     try:
-        if smoothing_error:
-            raise RuntimeError(smoothing_error)
-        _figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
-        for _axis, _sigma in zip(_axes, sigmas):
-            _smoothed = smoothed_by_sigma[_sigma]
-            _corners = corners_at_scale(
-                _smoothed,
-                threshold=harris_threshold.value,
-                max_corners=int(harris_max_corners.value),
-            ).reshape(-1, 2)
-            _axis.imshow(_smoothed, cmap="gray", vmin=0, vmax=255)
-            _axis.scatter(_corners[:, 1], _corners[:, 0], c="r", s=18)
-            _axis.set_title(f"Harris, σ = {_sigma} ({len(_corners)} found)")
-            _axis.axis("off")
-        plt.tight_layout()
-        _display = plt.gcf()
+    	if smoothing_error:
+    		raise RuntimeError(smoothing_error)
+    	_figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
+    	for _axis, _sigma in zip(_axes, sigmas):
+    		_smoothed = smoothed_by_sigma[_sigma]
+    		_corners = corners_at_scale(
+    			_smoothed,
+    			threshold=harris_threshold.value,
+    			max_corners=int(harris_max_corners.value),
+    		).reshape(-1, 2)
+    		_axis.imshow(_smoothed, cmap="gray", vmin=0, vmax=255)
+    		_axis.scatter(_corners[:, 1], _corners[:, 0], c="r", s=18)
+    		_axis.set_title(f"Harris, σ = {_sigma} ({len(_corners)} found)")
+    		_axis.axis("off")
+    	plt.tight_layout()
+    	_display = plt.gcf()
     except Exception as error:
-        _display = mo.md(f"Problem 2(c) is not ready: {error}")
+    	_display = mo.md(f"Problem 2(c) is not ready: {error}")
     _display
     return
 
@@ -513,13 +518,13 @@ def _(mo):
 
 @app.function
 def log_response(image, sigma):
-    """Return the Laplacian of Gaussian response of image at scale sigma."""
-    laplacian = homework1_definitions()["laplacian"]
+	"""Return the Laplacian of Gaussian response of image at scale sigma."""
+	laplacian = homework1_definitions()["laplacian"]
 
-    # EDIT BELOW
-    response = ...
+	# EDIT BELOW
+	response = ...
 
-    return response
+	return response
 
 
 @app.cell(hide_code=True)
@@ -538,37 +543,37 @@ def _(mo):
 @app.function
 # EDIT BELOW: choose a default fraction between 0 and 1.
 def local_extrema(response, fraction=...):
-    """Return (row, column) locations of the strong local extrema of response."""
-    import numpy as np
+	"""Return (row, column) locations of the strong local extrema of response."""
+	import numpy as np
 
-    magnitude = np.abs(np.asarray(response, dtype=float))
-    extrema = []
+	magnitude = np.abs(np.asarray(response, dtype=float))
+	extrema = []
 
-    # EDIT BELOW: append (row, column) for every pixel meeting the conditions above.
+	# EDIT BELOW: append (row, column) for every pixel meeting the conditions above.
 
-    return np.asarray(extrema, dtype=int).reshape(-1, 2)
+	return np.asarray(extrema, dtype=int).reshape(-1, 2)
 
 
 @app.cell(hide_code=True)
 def _(image_1, mo, np, plt, sigmas, smoothing_error):
     try:
-        if smoothing_error:
-            raise RuntimeError(smoothing_error)
-        log_by_sigma = {sigma: log_response(image_1, sigma) for sigma in sigmas}
-        _figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
-        for _axis, _sigma in zip(_axes, sigmas):
-            _response = log_by_sigma[_sigma]
-            _extrema = local_extrema(_response)
-            _limit = float(np.abs(_response).max()) or 1.0
-            _axis.imshow(_response, cmap="RdBu", vmin=-_limit, vmax=_limit)
-            _axis.scatter(_extrema[:, 1], _extrema[:, 0], c="k", marker="x", s=30)
-            _axis.set_title(f"LoG, σ = {_sigma}")
-            _axis.axis("off")
-        plt.tight_layout()
-        _display = plt.gcf()
+    	if smoothing_error:
+    		raise RuntimeError(smoothing_error)
+    	log_by_sigma = {sigma: log_response(image_1, sigma) for sigma in sigmas}
+    	_figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
+    	for _axis, _sigma in zip(_axes, sigmas):
+    		_response = log_by_sigma[_sigma]
+    		_extrema = local_extrema(_response)
+    		_limit = float(np.abs(_response).max()) or 1.0
+    		_axis.imshow(_response, cmap="RdBu", vmin=-_limit, vmax=_limit)
+    		_axis.scatter(_extrema[:, 1], _extrema[:, 0], c="k", marker="x", s=30)
+    		_axis.set_title(f"LoG, σ = {_sigma}")
+    		_axis.axis("off")
+    	plt.tight_layout()
+    	_display = plt.gcf()
     except Exception as error:
-        log_by_sigma = None
-        _display = mo.md(f"Problem 2(d) is not ready: {error}")
+    	log_by_sigma = None
+    	_display = mo.md(f"Problem 2(d) is not ready: {error}")
     _display
     return (log_by_sigma,)
 
@@ -591,37 +596,37 @@ def _(mo):
 
 @app.function
 def dog_response(image, sigma, k=1.4):
-    """Return the Difference of Gaussian response of image at scale sigma."""
-    # EDIT BELOW
-    response = ...
+	"""Return the Difference of Gaussian response of image at scale sigma."""
+	# EDIT BELOW
+	response = ...
 
-    return response
+	return response
 
 
 @app.cell(hide_code=True)
 def _(image_1, log_by_sigma, mo, np, plt, sigmas, smoothing_error):
     try:
-        if smoothing_error:
-            raise RuntimeError(smoothing_error)
-        if log_by_sigma is None:
-            raise RuntimeError("Complete the LoG response and extrema functions first.")
-        _dog_by_sigma = {sigma: dog_response(image_1, sigma) for sigma in sigmas}
-        _figure, _axes = plt.subplots(2, len(sigmas), figsize=(13, 7.2), squeeze=False)
-        for _row, (_method, _responses) in enumerate((
-            ("LoG", log_by_sigma), ("DoG", _dog_by_sigma)
-        )):
-            for _axis, _sigma in zip(_axes[_row], sigmas):
-                _response = _responses[_sigma]
-                _extrema = local_extrema(_response)
-                _limit = float(np.abs(_response).max()) or 1.0
-                _axis.imshow(_response, cmap="RdBu", vmin=-_limit, vmax=_limit)
-                _axis.scatter(_extrema[:, 1], _extrema[:, 0], c="k", marker="x", s=30)
-                _axis.set_title(f"{_method}, σ = {_sigma} ({len(_extrema)} extrema)")
-                _axis.axis("off")
-        _figure.tight_layout()
-        _display = _figure
+    	if smoothing_error:
+    		raise RuntimeError(smoothing_error)
+    	if log_by_sigma is None:
+    		raise RuntimeError("Complete the LoG response and extrema functions first.")
+    	_dog_by_sigma = {sigma: dog_response(image_1, sigma) for sigma in sigmas}
+    	_figure, _axes = plt.subplots(2, len(sigmas), figsize=(13, 7.2), squeeze=False)
+    	for _row, (_method, _responses) in enumerate((
+    		("LoG", log_by_sigma), ("DoG", _dog_by_sigma)
+    	)):
+    		for _axis, _sigma in zip(_axes[_row], sigmas):
+    			_response = _responses[_sigma]
+    			_extrema = local_extrema(_response)
+    			_limit = float(np.abs(_response).max()) or 1.0
+    			_axis.imshow(_response, cmap="RdBu", vmin=-_limit, vmax=_limit)
+    			_axis.scatter(_extrema[:, 1], _extrema[:, 0], c="k", marker="x", s=30)
+    			_axis.set_title(f"{_method}, σ = {_sigma} ({len(_extrema)} extrema)")
+    			_axis.axis("off")
+    	_figure.tight_layout()
+    	_display = _figure
     except Exception as error:
-        _display = mo.md(f"Problem 2(e) is not ready: {error}")
+    	_display = mo.md(f"Problem 2(e) is not ready: {error}")
     _display
     return
 
@@ -664,13 +669,13 @@ def _(mo):
 
 @app.function
 def downsample(image, factor):
-    """Keep every factor-th row and column of image, starting at [0, 0]."""
-    import numpy as np
+	"""Keep every factor-th row and column of image, starting at [0, 0]."""
+	import numpy as np
 
-    # EDIT BELOW
-    sampled = ...
+	# EDIT BELOW
+	sampled = ...
 
-    return sampled
+	return sampled
 
 
 @app.cell(hide_code=True)
@@ -683,36 +688,36 @@ def _(mo):
 
 @app.function
 def build_scale_pyramid(image, sigmas):
-    """Return (smoothed, levels): full-resolution and downsampled images per sigma."""
-    # EDIT BELOW
-    smoothed = ...
-    levels = ...
+	"""Return (smoothed, levels): full-resolution and downsampled images per sigma."""
+	# EDIT BELOW
+	smoothed = ...
+	levels = ...
 
-    return smoothed, levels
+	return smoothed, levels
 
 
 @app.cell(hide_code=True)
 def _(image_2, mo, plt, sigmas):
     try:
-        image_2_smoothed, image_2_levels = build_scale_pyramid(image_2, sigmas)
-        pyramid_error = None
-        _figure, _axes = plt.subplots(2, len(sigmas), figsize=(13, 6.2))
-        for _column, _sigma in enumerate(sigmas):
-            _axes[0, _column].imshow(image_2_smoothed[_column], cmap="gray", vmin=0, vmax=255)
-            _axes[0, _column].set_title(f"Smoothed, σ = {_sigma} (512×512)")
-            _level = image_2_levels[_column]
-            _axes[1, _column].imshow(
-                _level, cmap="gray", vmin=0, vmax=255, interpolation="nearest",
-            )
-            _axes[1, _column].set_title(f"Level {_column}: ÷{_sigma} ({_level.shape[0]}×{_level.shape[1]})")
-        for _axis in _axes.ravel():
-            _axis.axis("off")
-        plt.tight_layout()
-        _display = plt.gcf()
+    	image_2_smoothed, image_2_levels = build_scale_pyramid(image_2, sigmas)
+    	pyramid_error = None
+    	_figure, _axes = plt.subplots(2, len(sigmas), figsize=(13, 6.2))
+    	for _column, _sigma in enumerate(sigmas):
+    		_axes[0, _column].imshow(image_2_smoothed[_column], cmap="gray", vmin=0, vmax=255)
+    		_axes[0, _column].set_title(f"Smoothed, σ = {_sigma} (512×512)")
+    		_level = image_2_levels[_column]
+    		_axes[1, _column].imshow(
+    			_level, cmap="gray", vmin=0, vmax=255, interpolation="nearest",
+    		)
+    		_axes[1, _column].set_title(f"Level {_column}: ÷{_sigma} ({_level.shape[0]}×{_level.shape[1]})")
+    	for _axis in _axes.ravel():
+    		_axis.axis("off")
+    	plt.tight_layout()
+    	_display = plt.gcf()
     except Exception as error:
-        image_2_smoothed = image_2_levels = None
-        pyramid_error = str(error)
-        _display = mo.md(f"Problem 3(a) is not ready: {error}")
+    	image_2_smoothed = image_2_levels = None
+    	pyramid_error = str(error)
+    	_display = mo.md(f"Problem 3(a) is not ready: {error}")
     _display
     return image_2_levels, image_2_smoothed, pyramid_error
 
@@ -754,11 +759,11 @@ def _(mo):
 
 @app.function
 def image_2_corners(image, threshold=..., max_corners=...):
-    """Return the Harris corners of a smoothed Image 2 or pyramid level as (row, column)."""
-    # EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
-    corners = ...
+	"""Return the Harris corners of a smoothed Image 2 or pyramid level as (row, column)."""
+	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+	corners = ...
 
-    return corners
+	return corners
 
 
 @app.cell(hide_code=True)
@@ -773,54 +778,54 @@ def _(
     sigmas,
 ):
     def _harris_response(image, k=0.04):
-        # The CRF of Homework 1, Problem 3, used to report corner strengths.
-        image = np.asarray(image, dtype=float)
-        kernel = np.array([[0.5, 0.0, -0.5]])
-        gradient_x = convolve2d_full(image, kernel)[:, 1 : 1 + image.shape[1]]
-        gradient_y = convolve2d_full(image, kernel.T)[1 : 1 + image.shape[0], :]
-        box = np.ones((3, 3)) / 9
+    	# The CRF of Homework 1, Problem 3, used to report corner strengths.
+    	image = np.asarray(image, dtype=float)
+    	kernel = np.array([[0.5, 0.0, -0.5]])
+    	gradient_x = convolve2d_full(image, kernel)[:, 1 : 1 + image.shape[1]]
+    	gradient_y = convolve2d_full(image, kernel.T)[1 : 1 + image.shape[0], :]
+    	box = np.ones((3, 3)) / 9
 
-        def _average(values):
-            return convolve2d_full(values, box)[1 : 1 + image.shape[0], 1 : 1 + image.shape[1]]
+    	def _average(values):
+    		return convolve2d_full(values, box)[1 : 1 + image.shape[0], 1 : 1 + image.shape[1]]
 
-        a_xx, a_xy, a_yy = _average(gradient_x**2), _average(gradient_x * gradient_y), _average(gradient_y**2)
-        return a_xx * a_yy - a_xy**2 - k * (a_xx + a_yy) ** 2
+    	a_xx, a_xy, a_yy = _average(gradient_x**2), _average(gradient_x * gradient_y), _average(gradient_y**2)
+    	return a_xx * a_yy - a_xy**2 - k * (a_xx + a_yy) ** 2
 
     try:
-        if pyramid_error:
-            raise RuntimeError(pyramid_error)
-        # (i) corners are in full-resolution pixels; (ii) corners are in level pixels.
-        image_2_corners_full = {}
-        image_2_corners_pyramid = {}
-        _lines = [
-            "| σ | Corners (i) | Corners (ii) | Median R (i) | Median R (ii) |",
-            "|---|---|---|---|---|",
-        ]
-        _figure, _axes = plt.subplots(2, len(sigmas), figsize=(14, 7.4), squeeze=False)
-        for _index, _sigma in enumerate(sigmas):
-            _strengths = []
-            for _row, (_image, _store, _name) in enumerate((
-                (image_2_smoothed[_index], image_2_corners_full, "(i) full resolution"),
-                (image_2_levels[_index], image_2_corners_pyramid, "(ii) pyramid"),
-            )):
-                _points = np.asarray(image_2_corners(_image), dtype=int).reshape(-1, 2)
-                _store[_sigma] = _points
-                _values = _harris_response(_image)[_points[:, 0], _points[:, 1]]
-                _strengths.append(float(np.median(_values)) if len(_values) else float("nan"))
-                _axis = _axes[_row, _index]
-                _axis.imshow(_image, cmap="gray", vmin=0, vmax=255, interpolation="nearest")
-                _axis.scatter(_points[:, 1], _points[:, 0], s=18, c="r")
-                _axis.set_title(f"{_name}, σ = {_sigma} ({len(_points)} found)", fontsize=9)
-                _axis.axis("off")
-            _lines.append(
-                f"| {_sigma} | {len(image_2_corners_full[_sigma])} | {len(image_2_corners_pyramid[_sigma])} "
-                f"| {_strengths[0]:.3g} | {_strengths[1]:.3g} |"
-            )
-        plt.tight_layout()
-        _display = mo.vstack([plt.gcf(), mo.md("\n".join(_lines))])
+    	if pyramid_error:
+    		raise RuntimeError(pyramid_error)
+    	# (i) corners are in full-resolution pixels; (ii) corners are in level pixels.
+    	image_2_corners_full = {}
+    	image_2_corners_pyramid = {}
+    	_lines = [
+    		"| σ | Corners (i) | Corners (ii) | Median R (i) | Median R (ii) |",
+    		"|---|---|---|---|---|",
+    	]
+    	_figure, _axes = plt.subplots(2, len(sigmas), figsize=(14, 7.4), squeeze=False)
+    	for _index, _sigma in enumerate(sigmas):
+    		_strengths = []
+    		for _row, (_image, _store, _name) in enumerate((
+    			(image_2_smoothed[_index], image_2_corners_full, "(i) full resolution"),
+    			(image_2_levels[_index], image_2_corners_pyramid, "(ii) pyramid"),
+    		)):
+    			_points = np.asarray(image_2_corners(_image), dtype=int).reshape(-1, 2)
+    			_store[_sigma] = _points
+    			_values = _harris_response(_image)[_points[:, 0], _points[:, 1]]
+    			_strengths.append(float(np.median(_values)) if len(_values) else float("nan"))
+    			_axis = _axes[_row, _index]
+    			_axis.imshow(_image, cmap="gray", vmin=0, vmax=255, interpolation="nearest")
+    			_axis.scatter(_points[:, 1], _points[:, 0], s=18, c="r")
+    			_axis.set_title(f"{_name}, σ = {_sigma} ({len(_points)} found)", fontsize=9)
+    			_axis.axis("off")
+    		_lines.append(
+    			f"| {_sigma} | {len(image_2_corners_full[_sigma])} | {len(image_2_corners_pyramid[_sigma])} "
+    			f"| {_strengths[0]:.3g} | {_strengths[1]:.3g} |"
+    		)
+    	plt.tight_layout()
+    	_display = mo.vstack([plt.gcf(), mo.md("\n".join(_lines))])
     except Exception as error:
-        image_2_corners_full = image_2_corners_pyramid = None
-        _display = mo.md(f"Problem 3(b) is not ready: {error}")
+    	image_2_corners_full = image_2_corners_pyramid = None
+    	_display = mo.md(f"Problem 3(b) is not ready: {error}")
     _display
     return image_2_corners_full, image_2_corners_pyramid
 
@@ -870,13 +875,13 @@ def _(mo):
 
 @app.function
 def effective_sigma(factor, sigma):
-    """Return the scale, in original pixels, of sigma applied to the level downsampled by factor."""
-    import numpy as np
+	"""Return the scale, in original pixels, of sigma applied to the level downsampled by factor."""
+	import numpy as np
 
-    # EDIT BELOW
-    sigma_eff = ...
+	# EDIT BELOW
+	sigma_eff = ...
 
-    return sigma_eff
+	return sigma_eff
 
 
 @app.cell(hide_code=True)
@@ -891,43 +896,43 @@ def _(mo):
 
 @app.function
 def pyramid_extrema(levels, factors, sigmas, method="log"):
-    """Return (row, column, factor, sigma_eff) for the extrema of every level and scale."""
-    import numpy as np
+	"""Return (row, column, factor, sigma_eff) for the extrema of every level and scale."""
+	import numpy as np
 
-    extrema = []
-    # EDIT BELOW
+	extrema = []
+	# EDIT BELOW
 
-    return np.asarray(extrema, dtype=float).reshape(-1, 4)
+	return np.asarray(extrema, dtype=float).reshape(-1, 4)
 
 
 @app.cell(hide_code=True)
 def _(image_2, image_2_levels, mo, plt, pyramid_error, sigmas):
     try:
-        if pyramid_error:
-            raise RuntimeError(pyramid_error)
-        image_2_blobs = {
-            method: pyramid_extrema(image_2_levels, sigmas, sigmas, method=method)
-            for method in ("log", "dog")
-        }
-        _figure, _axes = plt.subplots(2, 2, figsize=(10, 10))
-        for _index, (_axis, _factor) in enumerate(zip(_axes.flat, sigmas)):
-            _axis.imshow(image_2, cmap="gray", vmin=0, vmax=255)
-            _count = 0
-            for _row, _column, _level_factor, _sigma_eff in image_2_blobs["log"]:
-                if _level_factor != _factor:
-                    continue
-                _axis.add_patch(plt.Circle(
-                    (_factor * _column, _factor * _row), _sigma_eff,
-                    fill=False, color=f"C{_index}", linewidth=1.2,
-                ))
-                _count += 1
-            _axis.set_title(f"Level f = {_factor}: {_count} LoG extrema", color=f"C{_index}")
-            _axis.axis("off")
-        _figure.tight_layout()
-        _display = _figure
+    	if pyramid_error:
+    		raise RuntimeError(pyramid_error)
+    	image_2_blobs = {
+    		method: pyramid_extrema(image_2_levels, sigmas, sigmas, method=method)
+    		for method in ("log", "dog")
+    	}
+    	_figure, _axes = plt.subplots(2, 2, figsize=(10, 10))
+    	for _index, (_axis, _factor) in enumerate(zip(_axes.flat, sigmas)):
+    		_axis.imshow(image_2, cmap="gray", vmin=0, vmax=255)
+    		_count = 0
+    		for _row, _column, _level_factor, _sigma_eff in image_2_blobs["log"]:
+    			if _level_factor != _factor:
+    				continue
+    			_axis.add_patch(plt.Circle(
+    				(_factor * _column, _factor * _row), _sigma_eff,
+    				fill=False, color=f"C{_index}", linewidth=1.2,
+    			))
+    			_count += 1
+    		_axis.set_title(f"Level f = {_factor}: {_count} LoG extrema", color=f"C{_index}")
+    		_axis.axis("off")
+    	_figure.tight_layout()
+    	_display = _figure
     except Exception as error:
-        image_2_blobs = None
-        _display = mo.md(f"Problem 3(c) is not ready: {error}")
+    	image_2_blobs = None
+    	_display = mo.md(f"Problem 3(c) is not ready: {error}")
     _display
     return (image_2_blobs,)
 
@@ -946,43 +951,43 @@ def _(mo):
 
 @app.function
 def to_original(points, factor):
-    """Map (row, column) points in a level downsampled by factor to the original image."""
-    import numpy as np
+	"""Map (row, column) points in a level downsampled by factor to the original image."""
+	import numpy as np
 
-    # EDIT BELOW
-    mapped = ...
+	# EDIT BELOW
+	mapped = ...
 
-    return mapped
+	return mapped
 
 
 @app.cell
 def _(plt):
     # For reference only: this visualization is provided for you.
     def plot_detections(image, corners_full, corners_pyramid, blobs, c=1.0):
-        """Show corners and blobs on the original image."""
-        import numpy as np
+    	"""Show corners and blobs on the original image."""
+    	import numpy as np
 
-        figure, axis = plt.subplots()
-        axis.imshow(image, cmap="gray")
+    	figure, axis = plt.subplots()
+    	axis.imshow(image, cmap="gray")
 
-        # Full-resolution corners already use original-image coordinates (red dots).
-        for points in corners_full.values():
-            points = np.asarray(points).reshape(-1, 2)
-            axis.scatter(points[:, 1], points[:, 0], color="red")
+    	# Full-resolution corners already use original-image coordinates (red dots).
+    	for points in corners_full.values():
+    		points = np.asarray(points).reshape(-1, 2)
+    		axis.scatter(points[:, 1], points[:, 0], color="red")
 
-        # Map pyramid corners back to the original image (blue crosses).
-        for factor, points in corners_pyramid.items():
-            points = to_original(points, factor)
-            axis.scatter(points[:, 1], points[:, 0], color="blue", marker="x")
+    	# Map pyramid corners back to the original image (blue crosses).
+    	for factor, points in corners_pyramid.items():
+    		points = to_original(points, factor)
+    		axis.scatter(points[:, 1], points[:, 0], color="blue", marker="x")
 
-        # Draw each blob as a circle: green for LoG, orange for DoG.
-        for method, color in (("log", "green"), ("dog", "orange")):
-            for row, column, factor, scale in blobs[method]:
-                row, column = to_original([(row, column)], factor)[0]
-                circle = plt.Circle((column, row), c * scale, fill=False, color=color)
-                axis.add_patch(circle)
+    	# Draw each blob as a circle: green for LoG, orange for DoG.
+    	for method, color in (("log", "green"), ("dog", "orange")):
+    		for row, column, factor, scale in blobs[method]:
+    			row, column = to_original([(row, column)], factor)[0]
+    			circle = plt.Circle((column, row), c * scale, fill=False, color=color)
+    			axis.add_patch(circle)
 
-        return figure
+    	return figure
 
     return (plot_detections,)
 
@@ -997,11 +1002,11 @@ def _(
     plot_detections,
 ):
     try:
-        if image_2_corners_full is None or image_2_blobs is None:
-            raise RuntimeError("Complete 3(b) and 3(c) first.")
-        _display = plot_detections(image_2, image_2_corners_full, image_2_corners_pyramid, image_2_blobs)
+    	if image_2_corners_full is None or image_2_blobs is None:
+    		raise RuntimeError("Complete 3(b) and 3(c) first.")
+    	_display = plot_detections(image_2, image_2_corners_full, image_2_corners_pyramid, image_2_blobs)
     except Exception as error:
-        _display = mo.md(f"Problem 3(d) is not ready: {error}")
+    	_display = mo.md(f"Problem 3(d) is not ready: {error}")
     _display
     return
 

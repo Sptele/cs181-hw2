@@ -30,10 +30,10 @@ def _():
 @app.cell(hide_code=True)
 def _(BytesIO, Image, Request, np, urlopen):
     def image_from_url(image_url):
-        """Download image_url and return it as a grayscale NumPy array."""
-        request = Request(image_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urlopen(request, timeout=30) as response:
-            return np.asarray(Image.open(BytesIO(response.read())).convert("L"), dtype=float)
+    	"""Download image_url and return it as a grayscale NumPy array."""
+    	request = Request(image_url, headers={"User-Agent": "Mozilla/5.0"})
+    	with urlopen(request, timeout=30) as response:
+    		return np.asarray(Image.open(BytesIO(response.read())).convert("L"), dtype=float)
 
     return (image_from_url,)
 
@@ -41,21 +41,21 @@ def _(BytesIO, Image, Request, np, urlopen):
 @app.cell(hide_code=True)
 def _(image_from_url):
     mare_image = image_from_url(
-        "https://bigdatahealth.ucsb.edu/sites/default/files/styles/logo/"
-        "public/logo/img_2289.jpeg"
+    	"https://bigdatahealth.ucsb.edu/sites/default/files/styles/logo/"
+    	"public/logo/img_2289.jpeg"
     )
     mare_side = min(mare_image.shape)
     mare_top = (mare_image.shape[0] - mare_side) // 2
     mare_left = (mare_image.shape[1] - mare_side) // 2
     mare_image = mare_image[
-        mare_top : mare_top + mare_side, mare_left : mare_left + mare_side
+    	mare_top : mare_top + mare_side, mare_left : mare_left + mare_side
     ]
     storke_tower_image = image_from_url(
-        "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/"
-        "Ucsb-storke-tower01.jpg/960px-Ucsb-storke-tower01.jpg"
+    	"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/"
+    	"Ucsb-storke-tower01.jpg/960px-Ucsb-storke-tower01.jpg"
     )
     kavli_image = image_from_url(
-        "https://www.kitp.ucsb.edu/sites/default/files/kitp/kavlisb.jpeg"
+    	"https://www.kitp.ucsb.edu/sites/default/files/kitp/kavlisb.jpeg"
     )
     return kavli_image, mare_image, storke_tower_image
 
@@ -145,28 +145,28 @@ def _(mo):
     Your response to 1(a)
 
     $$S_x * I_1 = \begin{bmatrix}
-        -1 & -1 & 0 & 1 & 1 \\
-        -5 & [-5] & 0 & 5 & 5 \\
-        -13 & -13 & 0 & 13 & 13 \\
-        -15 & -15 & 0 & 15 & 15 \\
-        -6 & -6 & 0 & 6 & 6
-        \end{bmatrix}
+    	-1 & -1 & 0 & 1 & 1 \\
+    	-5 & [-5] & 0 & 5 & 5 \\
+    	-13 & -13 & 0 & 13 & 13 \\
+    	-15 & -15 & 0 & 15 & 15 \\
+    	-6 & -6 & 0 & 6 & 6
+    	\end{bmatrix}
 
-        \\
-        \\
+    	\\
+    	\\
 
-        S_y * I_1 = \begin{bmatrix}
-        -1 & -3 & -4 & -3 & -1 \\
-        -3 & [-9] & -12 & -9 & -3 \\
-        -5 & -15 & -20 & -15 & -5\\
-        3 & 9 & 12 & 9 & 3 \\
-        6 & 18 & 24 & 18 & 6
-        \end{bmatrix}
-        $$
+    	S_y * I_1 = \begin{bmatrix}
+    	-1 & -3 & -4 & -3 & -1 \\
+    	-3 & [-9] & -12 & -9 & -3 \\
+    	-5 & -15 & -20 & -15 & -5\\
+    	3 & 9 & 12 & 9 & 3 \\
+    	6 & 18 & 24 & 18 & 6
+    	\end{bmatrix}
+    	$$
 
-        In the X-convolution output, there is a vertical edge centered around the 3rd column, because the intensity changes dramatically from the 2nd column to the 3rd column to the 4th column; this change indicates a large derivative that is indicative of an edge.
+    	In the X-convolution output, there is a vertical edge centered around the 3rd column, because the intensity changes dramatically from the 2nd column to the 3rd column to the 4th column; this change indicates a large derivative that is indicative of an edge.
 
-        In the Y-convolution output, there is a horizontal edge between the third and fourth rows, because the intensity changes dramatically from the 3rd to the 4th row. This change indicates a large derivative that is indicative of an edge.
+    	In the Y-convolution output, there is a horizontal edge between the third and fourth rows, because the intensity changes dramatically from the 3rd to the 4th row. This change indicates a large derivative that is indicative of an edge.
     """)
     return
 
@@ -186,12 +186,12 @@ def _(mo):
     mo.md(r"""
     $$
     L * I_2 = \begin{bmatrix}
-        0 & 10 & 10 & 10 & 0 \\
-        10 & [-20] & 80 & 70 & 10 \\
-        10 & 80 & -180 & -190 & 100 \\
-        10 & 70 & -190 & -200 & 100 \\
-        0 & 10 & 100 & 100 & 0
-        \end{bmatrix}
+    	0 & 10 & 10 & 10 & 0 \\
+    	10 & [-20] & 80 & 70 & 10 \\
+    	10 & 80 & -180 & -190 & 100 \\
+    	10 & 70 & -190 & -200 & 100 \\
+    	0 & 10 & 100 & 100 & 0
+    	\end{bmatrix}
     $$
 
     There is a corner around the origin, specifically in the middle of the 2x2 grid formed with the origin in the top left. There, multiple edges (indicated by zero-crossings) intersect to form a corner; there are zero-crossings in multiple directions there.
@@ -212,36 +212,38 @@ def _(mo):
 @app.cell
 def _(np):
     def convolve2d_full(image, kernel):
-        """Return the full 2D linear convolution of image and kernel."""
-        output_shape = (
-            image.shape[0] + kernel.shape[0] - 1,
-            image.shape[1] + kernel.shape[1] - 1,
-        )
+    	"""Return the full 2D linear convolution of image and kernel."""
+    	output_shape = (
+    		image.shape[0] + kernel.shape[0] - 1,
+    		image.shape[1] + kernel.shape[1] - 1,
+    	)
 
-        output = np.empty(output_shape, dtype=float)
+    	print(output_shape)
 
-        x_offsets = range(-(kernel.shape[1]//2), kernel.shape[1]//2+1)
-        x_offset = x_offsets[-1]
+    	output = np.empty(output_shape, dtype=float)
 
-        y_offsets = range(-(kernel.shape[0]//2), kernel.shape[0]//2+1)
-        y_offset = y_offsets[-1]
+    	x_offsets = range(-(kernel.shape[1]//2), kernel.shape[1]//2+1)
+    	x_offset = x_offsets[-1]
 
-        for y in range(output_shape[0]):
-            for x in range(output_shape[1]):
-                output[y,x] = 0
+    	y_offsets = range(-(kernel.shape[0]//2), kernel.shape[0]//2+1)
+    	y_offset = y_offsets[-1]
 
-                for ky in y_offsets:
-                    for kx in x_offsets:
-                        img_y = y-ky-y_offset
-                        img_x = x-kx-x_offset
+    	for y in range(output_shape[0]):
+    		for x in range(output_shape[1]):
+    			output[y,x] = 0
 
-                        if img_y < 0 or img_x < 0 or img_y >= image.shape[0] or img_x >= image.shape[1]:
-                            pass
-                        else: 
-                            output[y, x] += kernel[ky+y_offset, kx+x_offset] * image[img_y, img_x]
-    
+    			for ky in y_offsets:
+    				for kx in x_offsets:
+    					img_y = y-ky-y_offset
+    					img_x = x-kx-x_offset
 
-        return output
+    					if img_y < 0 or img_x < 0 or img_y >= image.shape[0] or img_x >= image.shape[1]:
+    						pass
+    					else: 
+    						output[y, x] += kernel[ky+y_offset, kx+x_offset] * image[img_y, img_x]
+	
+
+    	return output
 
     return (convolve2d_full,)
 
@@ -249,11 +251,11 @@ def _(np):
 @app.cell(hide_code=True)
 def _(convolve2d_full, image_1, image_2, laplacian, sobel_x, sobel_y):
     try:
-        convolve2d_full(image_1, sobel_x)
-        convolve2d_full(image_1, sobel_y)
-        convolve2d_full(image_2, laplacian)
+    	convolve2d_full(image_1, sobel_x)
+    	convolve2d_full(image_1, sobel_y)
+    	convolve2d_full(image_2, laplacian)
     except Exception as error:
-        print(f"Problem 1(c) test is not ready: {error}")
+    	print(f"Problem 1(c) test is not ready: {error}")
     return
 
 
@@ -270,34 +272,34 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(convolve2d_full, mare_image, np, sobel_x, sobel_y):
     try:
-        mare_sobel_x = convolve2d_full(mare_image, sobel_x)
-        mare_sobel_y = convolve2d_full(mare_image, sobel_y)
-        mare_edges = np.hypot(mare_sobel_x, mare_sobel_y)
-        mare_error = None
+    	mare_sobel_x = convolve2d_full(mare_image, sobel_x)
+    	mare_sobel_y = convolve2d_full(mare_image, sobel_y)
+    	mare_edges = np.hypot(mare_sobel_x, mare_sobel_y)
+    	mare_error = None
     except Exception as error:
-        mare_sobel_x = mare_sobel_y = mare_edges = None
-        mare_error = str(error)
+    	mare_sobel_x = mare_sobel_y = mare_edges = None
+    	mare_error = str(error)
     return mare_edges, mare_error, mare_sobel_x, mare_sobel_y
 
 
 @app.cell(hide_code=True)
 def _(mare_edges, mare_error, mare_image, mare_sobel_x, mare_sobel_y, mo):
     try:
-        if mare_error:
-            mo.output.replace(mo.md(f"Sobel test on mare is not ready: {mare_error}"))
-        else:
-            mo.output.replace(mo.vstack(
-                [
-                    mo.hstack(
-                        [mo.image(mare_image, width=220), mo.image(mare_sobel_x, width=220)]
-                    ),
-                    mo.hstack(
-                        [mo.image(mare_sobel_y, width=220), mo.image(mare_edges, width=220)]
-                    ),
-                ]
-            ))
+    	if mare_error:
+    		mo.output.replace(mo.md(f"Sobel test on mare is not ready: {mare_error}"))
+    	else:
+    		mo.output.replace(mo.vstack(
+    			[
+    				mo.hstack(
+    					[mo.image(mare_image, width=220), mo.image(mare_sobel_x, width=220)]
+    				),
+    				mo.hstack(
+    					[mo.image(mare_sobel_y, width=220), mo.image(mare_edges, width=220)]
+    				),
+    			]
+    		))
     except Exception as error:
-        mo.output.replace(mo.md(f"Could not display the Sobel test: {error}"))
+    	mo.output.replace(mo.md(f"Could not display the Sobel test: {error}"))
     return
 
 
@@ -335,46 +337,46 @@ def _(mo):
 @app.cell
 def blur_and_downsample(convolve2d_full):
     def blur_and_downsample(image, kernel):
-        """Blur image with kernel, then reduce each spatial dimension by two."""
-        # EDIT BELOW: call convolve2d_full, crop to image.shape, then subsample.
-        r = convolve2d_full(image, kernel)
+    	"""Blur image with kernel, then reduce each spatial dimension by two."""
+    	# EDIT BELOW: call convolve2d_full, crop to image.shape, then subsample.
+    	r = convolve2d_full(image, kernel)
 
-        return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)):2, kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2)):2]
+    	return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)):2, kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2)):2]
 
-        # Document your boundary convention:
-        # Zero-padding; when we get out of bounds, we just respond with a zero
+    	# Document your boundary convention:
+    	# Zero-padding; when we get out of bounds, we just respond with a zero
     return (blur_and_downsample,)
 
 
 @app.cell
 def _(blur_and_downsample, np):
     def build_gaussian_pyramid(
-        image, level_shapes=((512, 512), (256, 256), (128, 128), (32, 32))
+    	image, level_shapes=((512, 512), (256, 256), (128, 128), (32, 32))
     ):
-        """Return Gaussian-pyramid levels with exactly the requested shapes."""
-        kernel = np.array(
-            [
-                [1, 4, 6, 4, 1],
-                [4, 16, 24, 16, 4],
-                [6, 24, 36, 24, 6],
-                [4, 16, 24, 16, 4],
-                [1, 4, 6, 4, 1],
-            ],
-            dtype=float,
-        ) / 256
-        pyramid = [image]
-        queue = [image]
-        # EDIT BELOW: call blur_and_downsample until each requested level is reached.
-        # Keep levels in the same order as level_shapes.
-        for i in range(len(level_shapes)+1):
-            o = blur_and_downsample(queue[i], kernel)
+    	"""Return Gaussian-pyramid levels with exactly the requested shapes."""
+    	kernel = np.array(
+    		[
+    			[1, 4, 6, 4, 1],
+    			[4, 16, 24, 16, 4],
+    			[6, 24, 36, 24, 6],
+    			[4, 16, 24, 16, 4],
+    			[1, 4, 6, 4, 1],
+    		],
+    		dtype=float,
+    	) / 256
+    	pyramid = [image]
+    	queue = [image]
+    	# EDIT BELOW: call blur_and_downsample until each requested level is reached.
+    	# Keep levels in the same order as level_shapes.
+    	for i in range(len(level_shapes)+1):
+    		o = blur_and_downsample(queue[i], kernel)
 
-            queue.append(o)
+    		queue.append(o)
 
-            if o.shape in level_shapes:
-                pyramid.append(o)
+    		if o.shape in level_shapes:
+    			pyramid.append(o)
 
-        return pyramid
+    	return pyramid
 
     return (build_gaussian_pyramid,)
 
@@ -392,35 +394,35 @@ def _(mo):
 @app.cell
 def build_laplacian_pyramid(np):
     def build_laplacian_pyramid(gaussian_pyramid):
-        """Return Laplacian levels followed by the coarsest Gaussian residual."""
-        pyramid = []
-        rvr = gaussian_pyramid[::-1]
+    	"""Return Laplacian levels followed by the coarsest Gaussian residual."""
+    	pyramid = []
+    	rvr = gaussian_pyramid[::-1]
 
-        # EDIT BELOW: construct the Laplacian level at each requested resolution,
-        # then append the final coarsest Gaussian level.
+    	# EDIT BELOW: construct the Laplacian level at each requested resolution,
+    	# then append the final coarsest Gaussian level.
 
-        # start at the smallest and upscale by inserting 0s. then subtract the next layer from the upscaled (maybe reverse)
+    	# start at the smallest and upscale by inserting 0s. then subtract the next layer from the upscaled (maybe reverse)
 
-        for idx in range(len(rvr)-1):
-            scale = rvr[idx+1].shape[0] // rvr[idx].shape[0]
+    	for idx in range(len(rvr)-1):
+    		scale = rvr[idx+1].shape[0] // rvr[idx].shape[0]
 
-            gp = rvr[idx]
-            new_size = gp.shape[0]*scale
-            o = np.zeros((new_size, new_size), dtype=float)        
+    		gp = rvr[idx]
+    		new_size = gp.shape[0]*scale
+    		o = np.zeros((new_size, new_size), dtype=float)        
 
-            for i in range(0, new_size, scale):
-                for j in range(0, new_size, scale):
-                    o[i, j] = gp[i//scale, j//scale]
+    		for i in range(0, new_size, scale):
+    			for j in range(0, new_size, scale):
+    				o[i, j] = gp[i//scale, j//scale]
 
-            for i in range(new_size):
-                for j in range(new_size):
-                    o[i, j] = rvr[idx+1][i, j] - o[i, j]
-            pyramid.append(o)
+    		for i in range(new_size):
+    			for j in range(new_size):
+    				o[i, j] = rvr[idx+1][i, j] - o[i, j]
+    		pyramid.append(o)
 
-        rtnr = pyramid[::-1]
-        rtnr.append(rvr[0])
+    	rtnr = pyramid[::-1]
+    	rtnr.append(rvr[0])
 
-        return rtnr
+    	return rtnr
 
     return (build_laplacian_pyramid,)
 
@@ -438,29 +440,29 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(build_gaussian_pyramid, build_laplacian_pyramid, input_image):
     try:
-        gaussian_pyramid = build_gaussian_pyramid(input_image)
-        laplacian_pyramid = build_laplacian_pyramid(gaussian_pyramid)
-        pyramid_error = None
+    	gaussian_pyramid = build_gaussian_pyramid(input_image)
+    	laplacian_pyramid = build_laplacian_pyramid(gaussian_pyramid)
+    	pyramid_error = None
     except Exception as error:
-        gaussian_pyramid = laplacian_pyramid = None
-        pyramid_error = str(error)
+    	gaussian_pyramid = laplacian_pyramid = None
+    	pyramid_error = str(error)
     return gaussian_pyramid, laplacian_pyramid, pyramid_error
 
 
 @app.cell(hide_code=True)
 def _(gaussian_pyramid, laplacian_pyramid, mo, pyramid_error):
     try:
-        if pyramid_error:
-            mo.output.replace(mo.md(f"Pyramid visualization is not ready: {pyramid_error}"))
-        else:
-            mo.output.replace(mo.vstack(
-                [
-                    mo.hstack([mo.image(level, width=150) for level in gaussian_pyramid]),
-                    mo.hstack([mo.image(level, width=150) for level in laplacian_pyramid]),
-                ]
-            ))
+    	if pyramid_error:
+    		mo.output.replace(mo.md(f"Pyramid visualization is not ready: {pyramid_error}"))
+    	else:
+    		mo.output.replace(mo.vstack(
+    			[
+    				mo.hstack([mo.image(level, width=150) for level in gaussian_pyramid]),
+    				mo.hstack([mo.image(level, width=150) for level in laplacian_pyramid]),
+    			]
+    		))
     except Exception as error:
-        mo.output.replace(mo.md(f"Could not display the pyramids: {error}"))
+    	mo.output.replace(mo.md(f"Could not display the pyramids: {error}"))
     return
 
 
@@ -497,41 +499,41 @@ def _(mo):
 @app.cell
 def harris_corners(convolve2d_full, np, sobel_x, sobel_y):
     def harris_corners(image, threshold, max_corners=40, k=0.04):
-        """Return up to max_corners Harris corners as (row, column) locations."""
-        # EDIT BELOW: write your complete detector and any helpers here.
+    	"""Return up to max_corners Harris corners as (row, column) locations."""
+    	# EDIT BELOW: write your complete detector and any helpers here.
 
-        def crop_convolve(image, kernel):
-            r = convolve2d_full(image, kernel)
+    	def crop_convolve(image, kernel):
+    		r = convolve2d_full(image, kernel)
 
-            return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
-
-
-        # We will use Sobel X and Sobel Y
-
-        s_x = crop_convolve(image, sobel_x)
-        s_y = crop_convolve(image, sobel_y)
-
-        def smooth(img):
-            return crop_convolve(img, np.ones((3,3), dtype=float)/9)
+    		return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
 
 
-        Sx2 = smooth(s_x ** 2)
-        Sy2 = smooth(s_y ** 2)
-        Sxy = smooth(s_x*s_y)
+    	# We will use Sobel X and Sobel Y
+
+    	s_x = crop_convolve(image, sobel_x)
+    	s_y = crop_convolve(image, sobel_y)
+
+    	def smooth(img):
+    		return crop_convolve(img, np.ones((3,3), dtype=float)/9)
 
 
-        rtnr = []
+    	Sx2 = smooth(s_x ** 2)
+    	Sy2 = smooth(s_y ** 2)
+    	Sxy = smooth(s_x*s_y)
 
-        for i in range(s_x.shape[0]):
-            for j in range(s_x.shape[1]):
-                R = (Sx2[i,j]*Sy2[i,j]-Sxy[i,j]**2) - k*((Sx2[i,j]+Sy2[i,j])**2)
-           
-                if R >= threshold:
-                    rtnr.append((R, i, j))
 
-        rtnr.sort(reverse=True)
+    	rtnr = []
 
-        return np.array(rtnr[:max_corners])[:,1:]  
+    	for i in range(s_x.shape[0]):
+    		for j in range(s_x.shape[1]):
+    			R = (Sx2[i,j]*Sy2[i,j]-Sxy[i,j]**2) - k*((Sx2[i,j]+Sy2[i,j])**2)
+		   
+    			if R >= threshold:
+    				rtnr.append((R, i, j))
+
+    	rtnr.sort(reverse=True)
+
+    	return np.array(rtnr[:max_corners])[:,1:]  
 
     return (harris_corners,)
 
