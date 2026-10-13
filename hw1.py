@@ -210,7 +210,7 @@ def _(mo):
 
 
 @app.cell
-def _(np):
+def _(np, rvr):
     def convolve2d_full(image, kernel):
     	"""Return the full 2D linear convolution of image and kernel."""
     	output_shape = (
@@ -220,7 +220,6 @@ def _(np):
 
     	output = np.empty(output_shape, dtype=float)
 
-    	rvr = np.flip(kernel)
 
     	x_offsets = range(-(kernel.shape[1]//2), kernel.shape[1]//2+1)
     	x_offset = x_offsets[-1]
