@@ -518,7 +518,6 @@ def harris_corners(convolve2d_full, np, sobel_x, sobel_y):
     		return s
 
 
-
     	# We will use Sobel X and Sobel Y
 
 

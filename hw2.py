@@ -354,7 +354,7 @@ def convolve_same(image, kernel):
 	convolve2d_full = homework1_definitions()["convolve2d_full"]
 
 	# EDIT BELOW: use convolve2d_full, then crop to image.shape.
-	padded = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
+	padded = np.pad(image, pad_width=((kernel.shape[0]//2, kernel.shape[0]//2), (kernel.shape[1]//2, kernel.shape[1]//2)), mode="edge")
 
 	# how large is either side of the kernel?
 
@@ -442,77 +442,20 @@ def _(mo):
     return
 
 
-@app.cell
-def corners_at_scale(convolve2d_full, np):
-    def new_hc(image, threshold, max_corners=40, k=0.04):
-    	"""Return up to max_corners Harris corners as (row, column) locations."""
-    	# EDIT BELOW: write your complete detector and any helpers here.
+@app.function
+def corners_at_scale(smoothed, threshold=0.01, max_corners=4):
+	"""Return the Harris corners of a smoothed image as (row, column)."""
+	import numpy as np
+	harris_corners = homework1_definitions()["harris_corners"]
 
-    	sobel_x = homework1_definitions()["sobel_x"]
-    	sobel_y = homework1_definitions()["sobel_y"]
+	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+	corners = harris_corners(smoothed, threshold, max_corners)
 
-    	def edge_convolve(image, kernel):
-    		edged = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
-
-		
-
-    	def crop_convolve(image, kernel):
-    		padded = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
-
-    		# how large is either side of the kernel?
-
-    		r = convolve2d_full(padded, kernel)
-
-    		return r[kernel.shape[0]:kernel.shape[0] + image.shape[0]-1, kernel.shape[1]:kernel.shape[1] + image.shape[1]-1]
-
-
-
-    	# We will use Sobel X and Sobel Y
-
-
-    	s_x = crop_convolve(image, sobel_x)
-    	s_y = crop_convolve(image, sobel_y)
-
-
-    	def smooth(img):
-    		return crop_convolve(img, np.ones((3,3), dtype=float)/9)
-
-    	Sx2 = smooth(s_x ** 2)
-    	Sy2 = smooth(s_y ** 2)
-    	Sxy = smooth(s_x*s_y)
-
-    	R = (((Sx2*Sy2-Sxy**2) - k * ((Sx2+Sy2)**2)))
-	
-    	filtr = np.where(R >= threshold, R, 0)
-
-    	rtnr = []
-    	for i in range(filtr.shape[0]):
-    		for j in range(filtr.shape[1]):
-
-    			if (filtr[i,j] >= threshold):
-    				rtnr.append((filtr[i,j], i, j))
-
-    	rtnr.sort()
-
-    	print(rtnr)
-
-    	return np.array(rtnr[:max_corners])[:, 1:]
-
-    def corners_at_scale(smoothed, threshold=1000, max_corners=4):
-    	"""Return the Harris corners of a smoothed image as (row, column)."""
-    	import numpy as np
-    	harris_corners = homework1_definitions()["harris_corners"]
-
-    	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
-    	corners = harris_corners(smoothed, threshold, max_corners)
-
-    	return corners
-
-    return (corners_at_scale,)
+	return corners
 
 
 @app.cell(hide_code=True)
-def _(corners_at_scale, mo, plt, sigmas, smoothed_by_sigma, smoothing_error):
+def _(mo, plt, sigmas, smoothed_by_sigma, smoothing_error):
     try:
     	if smoothing_error:
     		raise RuntimeError(smoothing_error)
@@ -569,15 +512,16 @@ def _(mo):
     return
 
 
-@app.function
-def log_response(image, sigma):
-	"""Return the Laplacian of Gaussian response of image at scale sigma."""
-	laplacian = homework1_definitions()["laplacian"]
+@app.cell
+def log_response(gaussian_smooth):
+    def log_response(image, sigma):
+    	"""Return the Laplacian of Gaussian response of image at scale sigma."""
+    	laplacian = homework1_definitions()["laplacian"]
 
-	# EDIT BELOW
-	response = ...
+    	smoothed = gaussian_smooth(image, sigma)
+    	return convolve_same(smoothed, laplacian)
 
-	return response
+    return (log_response,)
 
 
 @app.cell(hide_code=True)
@@ -595,20 +539,58 @@ def _(mo):
 
 @app.function
 # EDIT BELOW: choose a default fraction between 0 and 1.
-def local_extrema(response, fraction=...):
+def local_extrema(response, fraction=0.1):
 	"""Return (row, column) locations of the strong local extrema of response."""
 	import numpy as np
 
 	magnitude = np.abs(np.asarray(response, dtype=float))
 	extrema = []
 
-	# EDIT BELOW: append (row, column) for every pixel meeting the conditions above.
+	def neighbor_check(i, j, max):
+		curr = magnitude[i, j]
 
+		for ki in [-1, 0, 1]:
+			for kj in [-1, 0, 1]:
+				if ki == 0 and kj == 0: continue
+
+				t = magnitude[i+kj, j+kj]
+
+				if curr < t or abs(t - curr) <= (10**-9 * max) : return True
+
+		return False
+
+	imtopdog = 0
+
+	def magnitude_check(i, j, imtopdog):	
+		p = False
+
+		if magnitude[i, j] > imtopdog:
+			imtopdog = magnitude[i, j]
+			p = True
+
+		if magnitude[i, j] >= fraction*imtopdog:
+			p = True
+
+		
+		return (p, imtopdog)
+
+	for i in range(magnitude.shape[0]-1):
+		for j in range(magnitude.shape[1]-1):
+
+			# neighbors
+			if neighbor_check(i, j, max=imtopdog) and (rtnr := magnitude_check(i, j, imtopdog=imtopdog))[0]:
+				imtopdog = rtnr[1]
+
+				extrema.append((i, j))
+
+	if len(extrema) == 0:
+		return np.empty((0,2), dtype=int)
+			
 	return np.asarray(extrema, dtype=int).reshape(-1, 2)
 
 
 @app.cell(hide_code=True)
-def _(image_1, mo, np, plt, sigmas, smoothing_error):
+def _(image_1, log_response, mo, np, plt, sigmas, smoothing_error):
     try:
     	if smoothing_error:
     		raise RuntimeError(smoothing_error)
@@ -626,6 +608,7 @@ def _(image_1, mo, np, plt, sigmas, smoothing_error):
     	_display = plt.gcf()
     except Exception as error:
     	log_by_sigma = None
+    	error.print_exc()
     	_display = mo.md(f"Problem 2(d) is not ready: {error}")
     _display
     return (log_by_sigma,)
