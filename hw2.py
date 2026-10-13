@@ -82,6 +82,7 @@ def _(mo):
     $$
 
     ## 1(a) Structure Matrix
+
     In the `structure_matrices` cell below, assign the four matrices given above as nested lists.
     """)
     return
@@ -101,6 +102,7 @@ def structure_matrices():
 def _(mo):
     mo.md(r"""
     ## 1(b) Eigenvalues and Feature Types
+
     Solve $\det(A - \lambda I) = 0$ by hand for each matrix and show your derivation in the Markdown answer cell below. Report both eigenvalues and use them to justify whether the matrix represents a corner, edge, flat region, or an invalid structure matrix. Use an eigenvalue threshold of 1 and state the assumptions behind your classification, including what makes a structure matrix valid. Do not use code or `np.linalg` for this part.
 
     **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
@@ -116,18 +118,22 @@ def _(mo):
     A structure matrix is valid if both eigenvalues are non-negative.
 
     A1:
+
     - eigenvalues: 6, 0
     - Edge
 
     A2:
+
     - eigenvalues: 8, 7
     - Corner
 
     A3:
+
     - eigenvalues: 0.001 (multiplicity 2)
     - Flat
 
     A4:
+
     - eigenvalues: 4, -2
     - Invalid
     """)
@@ -138,6 +144,7 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## 1(c) Classify Feature
+
     Complete `classify_feature(structure)` using your eigenvalue derivation from 1(b). Compute the eigenvalues directly (no `np.linalg`), then return `"corner"`, `"edge"`, `"flat"`, or `"invalid"`.
     """)
     return
@@ -198,11 +205,11 @@ def _(mo):
     - **Image 2:** 512×512, four squares:
 
     | Square | Top-left $(x, y)$ | Side |
-    |---|---|---|
-    | 1 | $(60, 60)$ | 40 |
-    | 2 | $(180, 300)$ | 80 |
-    | 3 | $(300, 100)$ | 120 |
-    | 4 | $(340, 340)$ | 140 |
+    | ------ | ----------------- | ---- |
+    | 1      | $(60, 60)$        | 40   |
+    | 2      | $(180, 300)$      | 80   |
+    | 3      | $(300, 100)$      | 120  |
+    | 4      | $(340, 340)$      | 140  |
 
     Complete `make_square_image` below and fill in the square tuples for Image 1 and Image 2 as given above.
     """)
@@ -346,9 +353,11 @@ def convolve_same(image, kernel):
     convolve2d_full = homework1_definitions()["convolve2d_full"]
 
     # EDIT BELOW: use convolve2d_full, then crop to image.shape.
-    padded = np.pad(image, (kernel.shape[0]//2, kernel.shape[1]//2), mode="edge")
+    padded = np.pad(image, (((kernel.shape[0])//2, (kernel.shape[0])//2), (kernel.shape[1]//2, kernel.shape[1]//2)), mode="edge")
 
-    return convolve2d_full(padded, kernel)[kernel.shape[0]//2:kernel.shape[0]//2 + image.shape[0], kernel.shape[1]//2:kernel.shape[1]//2 + image.shape[1]]
+    r = convolve2d_full(padded, kernel)
+	
+    return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
 
 
 @app.cell(hide_code=True)
@@ -485,7 +494,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 2(c): Shi–Tomasi comparison.**
 
-    *Double-click this cell to write your answer.*
+    _Double-click this cell to write your answer._
     """)
     return
 
@@ -634,7 +643,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 2(e).**
 
-    *Double-click this cell to write your answer. You may replace everything here.*
+    _Double-click this cell to write your answer. You may replace everything here._
     """)
     return
 
@@ -723,7 +732,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 3(a).**
 
-    *Double-click this cell to write your answer. You may replace everything here.*
+    _Double-click this cell to write your answer. You may replace everything here._
     """)
     return
 
@@ -831,7 +840,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 3(b).**
 
-    *Double-click this cell to write your answer. You may replace everything here.*
+    _Double-click this cell to write your answer. You may replace everything here._
     """)
     return
 
