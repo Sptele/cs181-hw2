@@ -124,7 +124,7 @@
     },
     {
       "id": "Xref",
-      "code_hash": "52a8b0182f0d55d9082050b7d254b319",
+      "code_hash": "59ad393c964314d71ef2efd1a7e06b18",
       "outputs": [
         {
           "type": "data",
@@ -150,7 +150,7 @@
         {
           "type": "stream",
           "name": "stdout",
-          "text": "A1: invalid\nA2: corner\nA3: flat\nA4: invalid\n",
+          "text": "A1: edge\nA2: corner\nA3: flat\nA4: invalid\n",
           "mimetype": "text/plain"
         }
       ]
@@ -235,7 +235,7 @@
     },
     {
       "id": "iLit",
-      "code_hash": "a570459fabdce497d0538f0e9c93669e",
+      "code_hash": "cf5bcd7cb4a1e2b3e09fc4cc94bc2f16",
       "outputs": [
         {
           "type": "data",
@@ -287,7 +287,7 @@
     },
     {
       "id": "AjVT",
-      "code_hash": "be6773eec7427c0fb0713e4359dfdbfc",
+      "code_hash": "af2e6ec26da3c7f0bde23d214edb4361",
       "outputs": [
         {
           "type": "data",
@@ -313,7 +313,7 @@
     },
     {
       "id": "ZBYS",
-      "code_hash": "0bce9f5e10911dca4dc9be6e175002f9",
+      "code_hash": "ea64438e41163893e4ae63213b4076f0",
       "outputs": [
         {
           "type": "data",
@@ -335,14 +335,7 @@
           }
         }
       ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "(100, 100) (7, 7) (112, 112)\n(7, 7) (106, 106)\n(100, 100) (13, 13) (124, 124)\n(13, 13) (112, 112)\n(100, 100) (25, 25) (148, 148)\n(25, 25) (124, 124)\n(100, 100) (49, 49) (196, 196)\n(49, 49) (148, 148)\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "console": []
     },
     {
       "id": "wAgl",

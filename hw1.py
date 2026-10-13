@@ -218,9 +218,9 @@ def _(np):
     		image.shape[1] + kernel.shape[1] - 1,
     	)
 
-    	print(output_shape)
-
     	output = np.empty(output_shape, dtype=float)
+
+    	rvr = np.flip(kernel)
 
     	x_offsets = range(-(kernel.shape[1]//2), kernel.shape[1]//2+1)
     	x_offset = x_offsets[-1]
@@ -240,7 +240,7 @@ def _(np):
     					if img_y < 0 or img_x < 0 or img_y >= image.shape[0] or img_x >= image.shape[1]:
     						pass
     					else: 
-    						output[y, x] += kernel[ky+y_offset, kx+x_offset] * image[img_y, img_x]
+    						output[y, x] += rvr[ky+y_offset, kx+x_offset] * image[img_y, img_x]
 	
 
     	return output

@@ -151,22 +151,20 @@ def _(mo):
 
 
 @app.cell
-def classify_feature(np):
+def classify_feature(math):
     def classify_feature(structure, threshold=1.0):
     	"""Return 'corner', 'edge', 'flat' or 'invalid' for a 2x2 structure matrix."""
 
-    	# tr = structure[0][0] + structure[1][1]
-    	# det = structure[0][0] * structure[1][1] - structure[0][1]**2
+    	tr = structure[0][0] + structure[1][1]
+    	det = structure[0][0] * structure[1][1] - structure[0][1]**2
 
-    	# disc = tr**2 - 4*det
+    	disc = tr**2 - 4*det
 
-    	# if disc < 0:
-    	#     return "invalid"
+    	if disc < 0:
+    	    return "invalid"
 
-    	# e1: float = (tr + math.sqrt(disc))/2
-    	# e2: float = (tr - math.sqrt(disc))/2
-
-    	e1, e2 = np.linalg.eigvals(structure)
+    	e1: float = (tr + math.sqrt(disc))/2
+    	e2: float = (tr - math.sqrt(disc))/2
 
     	if e1 < 0 or e2 < 0:
     		return "invalid"
@@ -298,20 +296,20 @@ def _(mo):
 @app.cell
 def gaussian_kernel_1d(math):
     def gaussian_kernel_1d(sigma):
-    	"""Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
-    	import numpy as np
+        """Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
+        import numpy as np
 
-    	def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
+        def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
 
-    	k_radius = math.ceil(3*sigma)
-    	k_len = 2*k_radius+1
+        k_radius = math.ceil(3*sigma)
+        k_len = 2*k_radius+1
 
-    	kernel = np.zeros(k_len, dtype=float)
+        kernel = np.zeros(k_len, dtype=float)
 
-    	for i in range(len(kernel)):
-    		kernel[i] = g(i-k_radius)
+        for i in range(len(kernel)):
+            kernel[i] = g(i-k_radius)
 
-    	return kernel / kernel.sum()
+        return kernel / kernel.sum()
 
     return (gaussian_kernel_1d,)
 
