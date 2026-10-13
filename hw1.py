@@ -210,7 +210,7 @@ def _(mo):
 
 
 @app.cell
-def _(np, rvr):
+def _(np):
     def convolve2d_full(image, kernel):
     	"""Return the full 2D linear convolution of image and kernel."""
     	output_shape = (
@@ -221,11 +221,11 @@ def _(np, rvr):
     	output = np.empty(output_shape, dtype=float)
 
 
-    	x_offsets = range(-(kernel.shape[1]//2), kernel.shape[1]//2+1)
-    	x_offset = x_offsets[-1]
+    	x_offsets = range(-((kernel.shape[1]-1)//2), kernel.shape[1] - (kernel.shape[1]-1)//2)
+    	x_offset = -x_offsets[0]
 
-    	y_offsets = range(-(kernel.shape[0]//2), kernel.shape[0]//2+1)
-    	y_offset = y_offsets[-1]
+    	y_offsets = range(-((kernel.shape[0]-1)//2), kernel.shape[0] - (kernel.shape[0]-1)//2)
+    	y_offset = -y_offsets[0]
 
     	for y in range(output_shape[0]):
     		for x in range(output_shape[1]):
@@ -239,7 +239,7 @@ def _(np, rvr):
     					if img_y < 0 or img_x < 0 or img_y >= image.shape[0] or img_x >= image.shape[1]:
     						pass
     					else: 
-    						output[y, x] += rvr[ky, kx] * image[img_y, img_x]
+    						output[y, x] += kernel[ky+y_offset, kx+x_offset] * image[img_y, img_x]
 	
 
     	return output
