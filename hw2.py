@@ -555,9 +555,11 @@ def local_extrema(response, fraction=0.1):
 
 				t = magnitude[i+kj, j+kj]
 
-				if curr < t or abs(t - curr) <= (10**-9 * max) : return True
 
-		return False
+				if abs(curr - t) <= (10**-9 * max): continue
+				if curr < t: return False
+
+		return True
 
 	imtopdog = 0
 
@@ -570,18 +572,23 @@ def local_extrema(response, fraction=0.1):
 
 		if magnitude[i, j] >= fraction*imtopdog:
 			p = True
-
 		
 		return (p, imtopdog)
 
-	for i in range(magnitude.shape[0]-1):
-		for j in range(magnitude.shape[1]-1):
+	for i in range(magnitude.shape[0]-2):
+		for j in range(magnitude.shape[1]-2):
 
-			# neighbors
-			if neighbor_check(i, j, max=imtopdog) and (rtnr := magnitude_check(i, j, imtopdog=imtopdog))[0]:
-				imtopdog = rtnr[1]
+			reali = i+1
+			realj = j+1
 
-				extrema.append((i, j))
+			if not neighbor_check(reali, realj, imtopdog): continue
+
+			magpass, newmax = magnitude_check(reali, realj, imtopdog)
+			imtopdog = newmax
+
+			if not magpass: continue
+
+			extrema.append((reali, realj))
 
 	if len(extrema) == 0:
 		return np.empty((0,2), dtype=int)
