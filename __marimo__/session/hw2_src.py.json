@@ -1,0 +1,722 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.1",
+    "script_metadata_hash": "aa2c850e921762f240bc2e8e9886a38c"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "ba81825d38d67f2b1fbd02de753de7fe",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "8c568e3eb88da71e257e497bfef87fa3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"homework-2-corner-and-blob-detection\">Homework 2: Corner and Blob Detection</h1>\n<span class=\"paragraph\">In this assignment, you will generate simple images containing black squares on a white background and apply different operators for corner and blob detection. You will compare Harris, Laplacian of Gaussian (LoG), and Difference of Gaussian (DoG) detections across smoothing scales and image resolutions.</span>\n<span class=\"paragraph\"><strong>Submission:</strong> upload <code>hw2.zip</code> containing <code>hw2.py</code>, <code>hw1.py</code>, and <code>hw2.pdf</code> if you submit handwritten answers. Keep these files in the same folder before creating the ZIP.</span>\n<span class=\"paragraph\"><strong>For every short-answer question, show all steps and explain your reasoning. You may write your answer in the notebook's Markdown cell using LaTeX, or, if you prefer handwriting, include your written solutions in a PDF named exactly <code>hw2.pdf</code>. Clearly label each problem in the PDF and write \"See hw2.pdf, Problem [number]\" in the corresponding Markdown answer cell. Illegible work will receive a zero.</strong></span>\n<span class=\"paragraph\"><strong>Rules:</strong> use your Homework 1 functions <code>laplacian</code>, <code>convolve2d_full</code>, and <code>harris_corners</code>. Do not use <code>np.convolve</code>, <code>scipy</code>, or <code>cv2</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "a6f2c8ee34ab4dffbdf97a97cca5ec27",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "871a4a939c84ae852d3c46aa58b363a7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "71b144230a28285b7252e1211d449df8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"problem-1-eigenvalues-of-the-structure-matrix\">Problem 1: Eigenvalues of the Structure Matrix</h1>\n<span class=\"paragraph\">In Homework 1, the Harris detector used <marimo-tex class=\"arithmatex\">||(R = \\det(A) - k\\,\\bigl(\\operatorname{trace}(A)\\bigr)^2||)</marimo-tex> without computing the eigenvalues of the structure matrix <marimo-tex class=\"arithmatex\">||(A||)</marimo-tex>. Here you compute them directly.</span>\n<marimo-tex class=\"arithmatex\">||[\nA_1 = \\begin{bmatrix} 3 &amp; 3 \\\\ 3 &amp; 3 \\end{bmatrix}\n\\qquad\nA_2 = \\begin{bmatrix} 8 &amp; 0 \\\\ 0 &amp; 7 \\end{bmatrix}\n\\qquad\nA_3 = \\frac{1}{1000}\\begin{bmatrix} 1 &amp; 0 \\\\ 0 &amp; 1 \\end{bmatrix}\n\\qquad\nA_4 = \\begin{bmatrix} 1 &amp; 3 \\\\ 3 &amp; 1 \\end{bmatrix}\n||]</marimo-tex><h2 id=\"1a-structure-matrix\">1(a) Structure Matrix</h2>\n<span class=\"paragraph\">In the <code>structure_matrices</code> cell below, assign the four matrices given above as nested lists.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "ac7619dadea51e6d838cbfc842401434",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "149d8c11223ec976bcdc8f816d3a8e40",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1b-eigenvalues-and-feature-types\">1(b) Eigenvalues and Feature Types</h2>\n<span class=\"paragraph\">Solve <marimo-tex class=\"arithmatex\">||(\\det(A - \\lambda I) = 0||)</marimo-tex> by hand for each matrix and show your derivation in the Markdown answer cell below. Report both eigenvalues and use them to justify whether the matrix represents a corner, edge, flat region, or an invalid structure matrix. Use an eigenvalue threshold of 1 and state the assumptions behind your classification, including what makes a structure matrix valid. Do not use code or <code>np.linalg</code> for this part.</span>\n<span class=\"paragraph\"><strong>Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in <code>hw2.pdf</code>, clearly labeled with the problem number. If you use the PDF, write \"See hw2.pdf, Problem [number]\" in the Markdown answer cell.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "c5098f03e300b7d72f7a15acb39c9621",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to Problem 1(b).</strong></span>\n<span class=\"paragraph\">A structure matrix is valid if both eigenvalues are non-negative.</span>\n<span class=\"paragraph\">A1:</span>\n<ul>\n<li>eigenvalues: 6, 0</li>\n<li>Edge</li>\n</ul>\n<span class=\"paragraph\">A2:</span>\n<ul>\n<li>eigenvalues: 8, 7</li>\n<li>Corner</li>\n</ul>\n<span class=\"paragraph\">A3:</span>\n<ul>\n<li>eigenvalues: 0.001 (multiplicity 2)</li>\n<li>Flat</li>\n</ul>\n<span class=\"paragraph\">A4:</span>\n<ul>\n<li>eigenvalues: 4, -2</li>\n<li>Invalid</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "07a977598608da503c8a1de56b47454b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1c-classify-feature\">1(c) Classify Feature</h2>\n<span class=\"paragraph\">Complete <code>classify_feature(structure)</code> using your eigenvalue derivation from 1(b). Compute the eigenvalues directly (no <code>np.linalg</code>), then return <code>\"corner\"</code>, <code>\"edge\"</code>, <code>\"flat\"</code>, or <code>\"invalid\"</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "e67ecbbbbdb4f069a96c2b89c0a34698",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "84f68ebd51552367f88e51c9d5250522",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "A1: edge\nA2: corner\nA3: flat\nA4: invalid\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "emfo",
+      "code_hash": "26409ff4467d1086ccd04acad31098a4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"problem-2-single-square-image-image-1\">Problem 2: Single-Square Image (Image 1)</h1>\n<h2 id=\"2a-image-generation\">2(a) Image generation</h2>\n<span class=\"paragraph\">You will generate the following grayscale images using code (no images are provided). Use a white background (255) with black squares (0). Coordinates are <marimo-tex class=\"arithmatex\">||((x, y) = (\\text{column}, \\text{row})||)</marimo-tex>.</span>\n<ul>\n<li><strong>Image 1:</strong> 100\u00d7100, one 32\u00d732 square with top-left corner <marimo-tex class=\"arithmatex\">||((30, 40)||)</marimo-tex>.</li>\n<li><strong>Image 2:</strong> 512\u00d7512, four squares:</li>\n</ul>\n<table>\n<thead>\n<tr>\n<th>Square</th>\n<th>Top-left <marimo-tex class=\"arithmatex\">||((x, y)||)</marimo-tex></th>\n<th>Side</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td><marimo-tex class=\"arithmatex\">||((60, 60)||)</marimo-tex></td>\n<td>40</td>\n</tr>\n<tr>\n<td>2</td>\n<td><marimo-tex class=\"arithmatex\">||((180, 300)||)</marimo-tex></td>\n<td>80</td>\n</tr>\n<tr>\n<td>3</td>\n<td><marimo-tex class=\"arithmatex\">||((300, 100)||)</marimo-tex></td>\n<td>120</td>\n</tr>\n<tr>\n<td>4</td>\n<td><marimo-tex class=\"arithmatex\">||((340, 340)||)</marimo-tex></td>\n<td>140</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Complete <code>make_square_image</code> below and fill in the square tuples for Image 1 and Image 2 as given above.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "591198f885f4bab599cecd123f8a074e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "031a86d49bbd558f8303b3312028f577",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "489fa471552baabee0267258846c1f9f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Display your generated images side by side below. These images will serve as the inputs for the subsequent detection tasks.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "c7f07d0743a1cf51f9db2593605a4653",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.marimo+mimebundle": "{\"image/png\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABgwAAAMlCAYAAACvi9jHAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjIsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvgI3uAAAAAAlwSFlzAAAewgAAHsIBbtB1PgAAQaxJREFUeJzt3Qm8bXPdP/BFtyhyZcg8lSgZM6vUE4lEkxQKTRoUejSR0kgvpKdBlKTnaSBRD5JEgyRCqVCZKyFEA0pcd/9fn1/P2v91zj17OOfuc/a5577fr9d+3X3uXXedtddae+/fWp/f7/tbpNVqtSoAAAAAAGChtuiwNwAAAAAAABg+gQEAAAAAACAwAAAAAAAABAYAAAAAAIDAAAAAAAAAEBgAAAAAAACFSY8BAAAAAACBAQAAAAAAIDAAAAAAAAAEBgAAAAAAgMAAAAAAAAAoTHoMAAAAAAAIDAAAAAAAAIEBAAAAAAAgMAAAAAAAAAQGAAAAAABAYdJjAAAAAABAYAAAAAAAAFTVLDsBYMF13333VTfccEN5Pnv27GqttdaqFlQz6bUAAMCwzZ07t/rjH/9Y/e1vf6sefvjh8nerr756tcwyywx70wCYxgQGMMqDDz5Y/frXv27/vN5661WPetSj7KcZ4Pbbb6/uuOOO9s9rr712teSSS1YLsksvvbR67nOfW57vvPPO1be+9a1qQTWTXgsAQO0Pf/hDdc8995TnuVGbG7Ys2P76179Wf/7zn6sHHnigeuxjH1utsMIK1eKLL15NFzfeeGP13ve+tzr77LNLp5ymk08+udp3332Htm0ATH8CAxijQb/JJpu0f7755purNddc035awPziF7+ofvrTn1ZXX311ddVVV5U/77777hHLnH/++dX2228/tG0EAGDmO/TQQ6uvfOUr5fk+++xTffGLXxz2JjHOcOCss86qfvKTn5RrjHQuu/fee0csM2vWrGqDDTaodt999+r1r399teyyyw5tH1933XXVlltuWbYbACZCYADMSAcddFB14YUXDnszAACABdiPf/zjEvR0M2fOnOrKK68sj4997GPVSSedVO26667VMBx88MEjwoKEFyuttFL1iEc8ovysHBEAvQgMgIVGhgrfeeedVavVqmaKDIHeaKONyvMnPOEJw94cAACY8RZbbLFyI37ppZcu8wPceuut7X9LqaKXvOQl1RlnnFG98IUvnNLtuv/++6tzzz23/fMpp5xSveIVr5jSbQBgwScwAGaklJVad911q/XXX78MD84jjfrUFv3Xv/5VzRQZbpyh0QAAwOA97nGPq/bYY49q8803L48NN9ywWmqppUYsc8stt1RHHXVUddxxx5XOSZlgOKWJnv3sZ1ezZ8+essPym9/8pj25cbZTWADARAgMgBnp4x//+LA3AQAAWMA9/elPL49uVltttepTn/pUtfbaa5fSqHHXXXdV3/jGN6pXv/rVUzrfQm2VVVaZst8LwMwiMIAJuueee8oEyZGe62kk1ubOnVtK32R4ahpqSy65ZM+al7fddlvp+Z7lH/OYx0xom/7+97+XhmnWl21abrnlqvmRybxuv/320is/dS8f+chHjvn6l19++XE1SP/5z3+W/fOPf/yj1NB8/OMfXy2yyCLVwi77409/+lPZP+nJlOP3qEc9quv/ue+++6obbrihPE/vpbXWWmtc52p6QOWcydDp/M4c5+l2vkzHc2oix6rT8ct7f6L7LMPfc/xi9dVX71mTNsf5j3/8Y3mefbTyyitP+mdLr/Mv/37HHXdUDz74YPXkJz+57ItO8vuzHX/5y19Kz76UGWvuMwBYkGUy3XwfxlOf+tQR33EpNZN21qMf/ejy/d2rnZMbx2mr5Puy3+/7sb5303bId3WuZ9J26PY93Ut6vuc7P+2KfIenDdXp9Wd0cF1zv5e0J+6+++6yrSkVlHVP9Hpqfh1wwAHV8ccfX1177bXl58suu2zSA4Pss+y7esLjZjtz9Ejkftrhad/mOD3wwAOlzZf2Wz/t6hzfq666qjxPu3i99dbr+X+uvvrqcp7VIyIWXXTRcb0vcv2c8zzne66F1lxzzWp+5X2W9eX3ZH9NZIRI7gdkuyZ6rk/Wvhz0e3yQx6a+3shrz34fvc/6leuEvKa8tpy/uT7q97MEaGgBI1x//fUpcN9+3HzzzWPuoZNPPrm9zGtf+9rydzfddFPr1a9+dWv27Nkj1rHhhhu2vvrVr86zjm9/+9utHXfcsfWIRzyivewjH/nI1k477dT65S9/2fXIzJkzp3XGGWe0DjrooNamm27aWmyxxUb8zjxWXHHF1j777NO6+uqrx3WUv/zlL7e22GKLEeuaNWtWa+edd2794Ac/KMuceOKJ7X/bf//9e67z73//e+uII45obbbZZq1FF110xLqXX3751t5779265pprWpOtuZ/OP//8cf3f22+/vXXllVeWx6C29e677269973vbT35yU9uLbLIIvMcw2WXXbb10pe+tOzv7MPR8hrqZXN8+j1X//SnP7Xe8pa3tJZbbrkRv2+llVZqvf3tb2/95S9/mfLzpZ/XMsxzan6PVdPXvva11tZbbz1iPRPZZ/n7epks38unPvWp9vIHH3zwlHy2jHX+5XP1DW94wzzn31VXXTXP/3/44YdbX/nKV1o77LBD69GPfvSI5fPz8573vNY555zTczsAYFj22muv9ndXvj87WWONNdrL3XLLLeXvPv/5z5e2zujvv3yP/vGPfxzx///85z+33vOe97RWXnnlEcuvttpqrY9+9KOtBx98sOt2Xnfdda1jjz229ZKXvKR8149u76StsuWWW7Y+85nPtB544IG+X3+283Wve13rcY973Ij15fUedthhrfvuu68st8oqq7T/7a677uq53osuuqi1++67lzZYc71pF6Ztmu3817/+1ZpquR6styXb1019bZFH2poTkXbV6LZap0enNuU///nPcuw333zzedrVK6ywQmvfffft2a7OMav/T45lP5rH7t577+37fZH25TOe8YwR52ja4RP1ne98p7Xrrru2HvvYx86zz3J9vtFGG7Xe9a53tX7605/2vF584xvfOM85Od5zfbL25aDf4/N7bH73u9+13vrWt7ae+MQnzrPf11577dY73/nO1p133tlzO37729+29ttvv3k+++rPg2xnPoNOP/30nusC/k1gAAMKDM4999zWUkst1bWBdsghh7RvgL3tbW/ruuxjHvOY9o3DsTQbEb0eCSQ+8YlP9DzWaVC/6EUv6rqufPF/8IMfHFdgkAbY6EbTWI98mR9zzDHTNjA4/PDDx91w6+byyy8vN7b7PY65KBpEYPDDH/5wnhu1ox+5KZ4G71SeL+MJDKb6nBrEsYqHHnqo9YpXvGJg+2wyAoNBf7aMPv/OPvvsjp+Vv/rVr0b833z+brLJJn1ty2677da6//77e+4DAFgQAoMbb7yx9YIXvKDrd1+CgFy7RG44N///WI9ddtmldAzopNmu6PXYeOON2zcIu7ngggvGvAnbfDzpSU8qHa/6DQzyff/yl7+8r+1Mx63clJxKCQnq358OOt00t7WfttxkBAbpALLWWmv11e778Ic/PNTAIOd7OteNtX25CT5ec+fObb3mNa/pe/9tt912Hdf1ox/9qLX00ksP5FyfrH056Pf4/Bybo446qvWoRz2q53Zkn373u9/teq2RoKPf1wX0R0kiGNDkUi972cvKsM/IELo8MqSuLhcSRx55ZLXddttVP/7xj9s19jO8M6VEMmw2ZTsy3LguefKqV72q+u1vf1stscQSPbchQw4z3C6/N8PvMvFWhpFGhvUdeOCBpeRJtrOTfffdt/rf//3fEX+XIagZmliXDUm79n3ve195Hf0444wzqpe//OXtybciQxXzmjPcMevMkMF66Obb3/72atasWWV7Z7IM0XzpS1864vzIUMkMEc7Q8ZxL2TcZEjxIOZ9e+MIXlnJZkeGhGaae8+33v//9iOXe8IY3VGeeeeaUni/T8Zwa5LHK5HennnrqmPssQ+lTVmky9tn8GMRnS3PYcl5//TmX/Zf9WJdzShmB2s0331wm9W7u93xerrrqquX/ZdhytqV2+umnlyHROSeVOANgQfemN72p+u53v9tu56yxxhrlOznfjw899FD5+3wPptxNvgN32mmnUv6j+f2aNkrzu/Lss8+uPv3pT/fdJsr1Sb7/U6okbbuUaqml1M2uu+5aXXrppR3LMv7yl7+sdtlllxFtpLyWlCdMWyrXPmlnXX/99dWLX/zi8ryXLJM2Un5vU339lX9Pm7YuzfKrX/2qes5znlNdccUVEy5xMh45NhdddFH752233XbSf2f2/0YbbdQuEXrTTTe1z4PR5UrTjmrK+fSMZzxjxNwHaUflGOX4p5RlfY2bdt9hhx1W2lsf+MAHqmG9Ly644IIR27n00kuX53mPjNcJJ5xQfeELXxjxd9lvadvmHE3bPG30f2c73du4eQ/WbdzI9UeuT/K+zbme/Taec30qzO97fKLH5h3veEd1zDHHjPi7bEOuS7O/muddzs2dd965uvDCC6utt956xP+55pprqv3226/9fq+vJ3Kep3xbXlOuJerPTGAc+gwWYKExkREG9SOJ+i9+8YsRy1144YUjehCk90Z6PaeHRsqbNHsUpMf2xz/+8RElijr1NEnJmPRe+dznPld6IGXUQlN6D33ve99rbbPNNu11Zdhhp6HI3/zmN0e8lqc//emtyy67bJ7eJ+n53U9Plch2NXsUZWhwSoeMHhqcXsUvfvGLRwz7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CAwAAAAAAIDCpMcAAAAAAIDAAAAAAAAAEBgAAAAAAAACAwAAAAAAQGAAAAAAAAAUJj0GAAAAAAAEBgAAAAAAgMAAAAAAAAAQGAAAAAAAAAIDAAAAAACgMOkxAAAAAAAgMAAAAAAAAAQGAAAAAACAwAAAAAAAABAYAAAAAAAAhUmPAQAAAAAAgQEAAAAAACAwAAAAAAAABAYAAAAAAIDAAAAAAAAAKEx6DAAAAAAACAwAAAAAAACBAQAAAAAAIDAAAAAAAAAEBgAAAAAAQGHSYwAAAAAAQGAAAAAAAAAIDAAAAAAAAIEBAAAAAAAgMAAAAAAAAAqTHgMAAAAAAAIDAAAAAABAYAAAAAAAAAgMAAAAAAAAgQEAAAAAAFCY9BgAAAAAABAYAAAAAAAAAgMAAAAAAEBgAAAAAAAACAwAAAAAAIDCpMcAAAAAAIDAAAAAAAAAEBgAAAAAAAACAwAAAAAAQGAAAAAAAAAUJj0GAAAAAAAEBgAAAAAAgMAAAAAAAAAQGAAAAAAAAAIDAAAAAACgMOkxAAAAAAAgMAAAAAAAAAQGAAAAAACAwAAAAAAAABAYAAAAAAAAhUmPAQAAAAAAgQEAAAAAACAwAAAAAAAABAYAAAAAAIDAAAAAAAAAKEx6DAAAAAAACAwAAAAAAACBAQAAAAAAIDAAAAAAAAAEBgAAAAAAQGHSYwAAAAAAQGAAAAAAAAAIDAAAAAAAAIEBAAAAAAAgMAAAAAAAAAqTHgMAAAAAAAIDAAAAAABAYAAAAAAAAAgMAAAAAAAAgQEAAAAAAFCY9BgAAAAAABAYAAAAAAAAAgMAAAAAAEBgAAAAAAAACAwAAAAAAIDCpMcAAAAAAIDAAAAAAAAAEBgAAAAAAAACAwAAAAAAQGAAAAAAAAAUJj0GAAAAAAAEBgAAAAAAgMAAAAAAAAAQGAAAAAAAAAIDAAAAAACgMOkxAAAAAAAgMAAAAAAAAAQGAAAAAACAwAAAAAAAABAYAAAAAAAAhUmPAQAAAAAAgQEAAAAAACAwAAAAAAAABAYAAAAAAIDAAAAAAAAAKEx6DAAAAAAACAwAAAAAAACBAQAAAAAAIDAAAAAAAAAEBgAAAAAAQGHSYwAAAAAAQGAAAAAAAAAIDAAAAAAAAIEBAAAAAAAgMAAAAAAAAAqTHgMAAAAAAAIDAAAAAABAYAAAAAAAAAgMAAAAAAAAgQEAAAAAAFCY9BgAAAAAABAYAAAAAAAAAgMAAAAAAEBgAAAAAAAACAwAAAAAAIDCpMcAAAAAAIDAAAAAAAAAEBgAAAAAAABVVc2yFwAAAABg4bLaaqtVm2222bA3A6aV2bNnVws7gQEAAAAALGQOOOCA8gBoMukxAAAAAAAgMAAAAAAAAAQGAAAAAACAwAAAAAAAABAYAAAAAAAAhUmPAQAAAAAAgQEAAAAAACAwAAAAAAAABAYAAAAAAIDAAAAAAAAAKEx6DAAAAAAACAwAAAAAAACBAQAAAAAAIDAAAAAAAAAEBgAAAAAAQGHSYwAAAAAAQGAAAAAAAAAIDAAAAAAAAIEBAAAAAAAgMAAAAAAAAAqTHgMAAAAAAAIDAAAAAABAYAAAAAAAAAgMAAAAAAAAgQEAAAAAAFCY9BgAAAAAABAYAAAAAAAAAgMAAAAAAEBgAAAAAAAACAwAAAAAAIDCpMcAAAAAAIDAAAAAAAAAEBgAAAAAAAACAwAAAAAAQGAAAAAAAAAUJj0GAAAAAAAEBgAAAAAAgMAAAAAAAAAQGAAAAAAAAAIDAAAAAACgMOkxAAAAAAAgMAAAAAAAAKpq1qB2wpw5c9rPb7/9dvsWAADGodmGbratZzLXEAAAML2uIQYWGNx1113t51tsscWgVgsAAAudtK3XXHPNaqZzDQEAANPrGsIcBgAAAAAAQLVIq9VqDWI/PPDAA9VVV11Vni+//PLVrFkDG7wAAAAzXoYQ1z3uN9hgg2rxxRevZjrXEAAAML2uIQYWGAAAAAAAAAsuJYkAAAAAAACBAQAAAAAAIDAAAAAAAAAEBgAAAAAAgMAAAAAAAAAoTHoMAAAAAAAIDAAAAAAAAIEBAAAAAAAgMAAAAAAAAAQGAAAAAABAYdJjAAAAAABAYAAAAAAAAAgMAAAAAAAAgQEAAAAAACAwAAAAAAAACpMeAwAAAAAAAgMAAAAAAKio/h8O8iDnN13IFwAAAABJRU5ErkJggg==\", \"__metadata__\": {\"image/png\": {\"width\": 774, \"height\": 402}}}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "daedfe4a047e210fd339b2eea5198586",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2b-gaussian-smoothing\">2(b) Gaussian smoothing</h2>\n<span class=\"paragraph\">Using the generated 100\u00d7100 single-square image, apply Gaussian smoothing at four different scales <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex>. These smoothed images will be used to compute the Harris Corner Response Function (CRF) and compare detected corners across scales.</span>\n<span class=\"paragraph\">Given <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>, complete <code>gaussian_kernel_1d(sigma)</code> to return a vector whose entries correspond to the integer offsets <marimo-tex class=\"arithmatex\">||(-r, -r+1, \\dots, r||)</marimo-tex>, where <marimo-tex class=\"arithmatex\">||(r = \\lceil 3\\sigma \\rceil||)</marimo-tex>. At each offset <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>, the value should be the Gaussian <marimo-tex class=\"arithmatex\">||(G_\\sigma(x)||)</marimo-tex>. Normalize the vector so its entries sum to 1.</span>\n<span class=\"paragraph\">For example, when <marimo-tex class=\"arithmatex\">||(\\sigma = 1||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(r = 3||)</marimo-tex>, so the kernel has 7 entries corresponding to offsets <marimo-tex class=\"arithmatex\">||(-3, -2, -1, 0, 1, 2, 3||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "cf5bcd7cb4a1e2b3e09fc4cc94bc2f16",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "7dd15e169f33c8d2128232934e34d0ad",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Using your <code>gaussian_kernel_1d(sigma)</code> function, complete <code>gaussian_kernel_2d(sigma)</code> to compute the 2D Gaussian kernel. Return a <marimo-tex class=\"arithmatex\">||((2r+1) \\times (2r+1)||)</marimo-tex> array whose entries sum to 1.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "db501d02551a8ae899f1b445c681d11c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "9fcf891d21305fe0f57dc88a69e65528",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Let's write the function for applying your 2D Gaussian filter! Complete <code>convolve_same(image, kernel)</code>: pad the image using edge replication (<code>np.pad(..., mode=\"edge\")</code>), then use <code>convolve2d_full</code> and crop the result to the original image size, with the kernel centred on each pixel. Edge replication repeats the nearest boundary pixels, so smoothing a constant image should return the same image.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "506ecb7d79e809d231a5723189025e10",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "fae845952153987479c85c45fc8a0015",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Now apply it! Complete <code>gaussian_smooth(image, sigma)</code> for 2D Gaussian smoothing.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "0bce9f5e10911dca4dc9be6e175002f9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "b10646e00d75a0b344f3dd846e2314b2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.marimo+mimebundle": "{\"image/png\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAChQAAAK2CAYAAACsbeRFAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjIsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvgI3uAAAAAAlwSFlzAAAewgAAHsIBbtB1PgAAcrtJREFUeJzs3QmUZFV9OP5XW3dPDzPAILIKKLiOiktwX3CJGsUlUf/uiQRX3I1bNGo0xg2TKGhwyTE/lRg1MRE1rigiUQTXiEQNIgpBkR1m7aXq/c99c7rTPfNudd+aV13VXZ/POXO651u37rtvqX7fuvWt92p5nucZAAAAAAAAAAAAMNLqgx4AAAAAAAAAAAAAMHgKCgEAAAAAAAAAAAAFhQAAAAAAAAAAAICCQgAAAAAAAAAAAEBBIQAAAAAAAAAAAKCgEAAAAAAAAAAAACjUd/0AAAAAAAAAAAAARpmCQgAAAAAAAAAAAEBBIQAAAAAAAAAAAKCgEAAAAAAAAAAAAFBQCAAAAAAAAAAAACgoBAAAAAAAAAAAAAr1XT8AAAAAAAAAAACAUaagEAAAAAAAAAAAAFBQCAAAAAAAAAAAACgoBAAAAAAAAAAAABQUAgAAAAAAAAAAAAoKAQAAAAAAAAAAgEJz1w+A4XPppZdm27ZtK36/1a1ulU1OTmZraZ2OOeaYbGJiYtBDAgAYOiFfCnlTsM8++2RHHXVUtpbWaePGjdkRRxwx6CEBAAwlc4IAAKPJnCDA8KjleZ4PehAwDDqdTnbNNddkN954YzY2NpZt2rQp27Bhw6CHNdKOP/747Jxzzil+P/fcc7P73e9+2WoX1uFb3/pW8ft3v/vd7Pd+7/cGPSQW/A0IE9Y7duwo/t9qtbLb3va2tg/ACE1WXXvttcV5YP/99y9ywWbT968G5Rvf+Eb2oAc9qPj9IQ95SHbWWWdlq11Yh9///d8vfn/Uox6Vff7znx/0kMiyLEyJXH311dlNN91U/B5e/ze72c1sG4ARYk5w+JgTZFB27tyZ/eIXv5j/f6PRyG5/+9vbIQBrmDnB4WJOkJW2devWokZkeno623fffbOb3/zmWa1WsyPAFQoZdWGC4OMf/3j2T//0T0Vx15YtWxY9HgqKDj300KLo6x73uEd273vfO7v//e8/sPGuZpdddlnxIV1w5JFHKtZkoGZmZrKvf/3r2YUXXpj95Cc/KX7+9Kc/nS8mDA477LDsf//3fwc6TgD6K/z9/8AHPpB95StfKT402v27VuEqcps3b86OO+644t/DHvawYkKB3j+UW7duXXb00UfbhAzMf//3fxev+fPPP7/4G3DxxRcXE4YLHXDAAcX7vpNOOik74YQTBjZWAPrHnODKMSfIavLqV786O/XUU+f/v379+uJDZgDWFnOCK8OcIMMqXGDmve99b/bZz342u+SSSxZ9LhA+E7jPfe6TnXjiidkTn/hExYWMNJfcYGSFD5Ce/vSnL/rGYVnR0a9//evi36c//ensoIMOyq688soVHeda8eIXvzg788wzi98/97nP+WCOgbriiiuyRzziEfYCwIianZ3NXvGKV2SnnXZacUWamPBliPPOO6/4F5x++unZ8573vBUc6drws5/9LLvrXe9a/H73u989+973vjfoITHC3vCGNxTv7boJVyv9zGc+U/wLV8g844wzsoMPPnjFxghAf5kTXFnmBFktLrjgguKDZQDWLnOCK8ucIMMozPG//OUvLwpeY58JfOlLXyr+hdwwzCMeeOCBKz5OGAYKChlJ4WqED33oQ/f4duHk5GTxQVG4lUG4tO0NN9ywx5VqgLWpXq8Xt7gLHyADsLaFL5V88pOf3CMe8sBwW4OQI4bzQWxSAVhbwpUzw22OJyYmst/85jfF7Y7mfO1rX8se/OAHZ9/61reKXBGA1c2cIBArMHn2s59dfOFsbGxsjytYA7A2mBOE0fbRj340O/nkk/eIh3nBDRs2FHeuCxecmnPuuecWdy0KXzwJd7aEUaOgkJHTbreLS9TOFRPWarXsOc95TnG1mWOPPXbRZWtD29/+9rfFVVTCt5d/+ctfDnDkQFXCxGBIAO90pztld7zjHYt/4ZaW4SqaT3nKU2xogDUsFBIuLCY85phjiiuWPfrRj87222+/RW1DvvjTn/60yAPDpEG4WjWwut3hDncobl0+dyvzcAvuUFC48D3g2Wefnb3yla/MfvSjHxWx8Hfgta99bfENZgBWL3OCQMwpp5yS/fjHPy4+G3jVq16VveUtb7GxANYYc4Iw2qampoorE85Zv3599prXvCZ7wQteMP8l4vDlknPOOSd73eteN3/XojA/+IEPfCB74QtfOLCxw6AoKGTkhEryiy66aP7/H/rQh7KTTjqptG24UuHhhx9e/Hvc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P1xwwQXZ0572tPl12n0bhtsFhlsSLhRu03e7291u0S3f9vYWkFVJuTU2AOx+fjv22GOzH/7wh8X/3/jGN2YPfvCDk261u5Rwu+ITTjihyAGCcK4N59yQW4XH5nzkIx/JHvjABxa3T3jpS1+6x/k55A7htsdByE+e9axnZfe9732L82CZ0047LXvxi1+8KBbyz5CHhltuhPGEPCgIuc4DHvCA7Pzzz8/ucIc79K2//fbbL9u8eXORC83d9jjkR0cfffQey7vZzW4W3aYh3/qDP/iD7Ne//vV8XhJyrXCr4pBjzo0jbLOnPvWp2fe+973oLZDDGB/ykIcUOcqc0DZs13B76XBr6nD74zmnnHJKcYvg8H6hzFve8pbitmgLhXwv3DZj7rbMwemnn77o1s8r6ZnPfGZ21llnLYotfM8R9mVYx4XC+Ody87IceLlCHrhwW++t1Ftj762zzz57/vgK74HudKc7rdiyAaieOcFdzAmaEzQnuMtLXvKS7LrrriveX4R8HYC1y5ygOUFzgruM8pzgve51r+xud7tbUZsRxvbqV7+6eG9UNo980UUXFY/Nef7zn79Xy4ZVa9AVjbDSdu7cWVxFZWGF/THHHJO/9rWvzb/0pS/lV199dU/9LryaXvgXbnf2pje9aVF/odL9L//yLxe1u81tblP8DLeRC5fODeNbeIvacFuyubaTk5P5TTfdVLr8cBvlhf2G27QtvEJL+PbNl7/85fwOd7jDonbhynUr0d9jH/vY+Taf+9znetqm4YpCr3jFK/LLL798vk24Yky49Vi4NfRcu3vd617RPt/1rnct6u95z3tecQXChbcdDLef/vjHP54ffvjhi66MUyZsl4VjfMlLXpJfccUVi/r6yEc+UtyKb1BX/Tv22GP3uCLSJZdcMv94WPdwy8dw28KF7cLrYW8tvLpQVf92v5JlldzyGGDtC1cl3D1n+6M/+qP8H/7hH4qcoJerV5ed78J59Rvf+Maiq9t9//vfz29/+9svuqLePvvsU/z+7Gc/O//lL38533ZmZib/f//v/y26wvBf/MVfRG/ZtvBKgje/+c2L/GPhrYjD7YBf9apXLbraWri1Q9nV96ruL3z7d67N3e9+95636ebNm/P/+I//yKenp+fb/e53v8tPOumkZeUw4Up9C98H3PrWt87POOOMPfLrn//85/mJJ564qM9wtezdheNl4ZUlQ39hfGHfLezrCU94wsC+4ftv//Zvi5Ybrpz5iU98YtF7jmuuuSZ/y1vesmhd7nOf++xxW+5e7J7P7+2/3a9k2U/hWA7bYW7ZL33pS1ds2QD0hzlBc4LmBM0Jll2F8O1vf/uivxWuUAiwNpkTNCdoTtCcYKh1CDUZc8fCne985+Jz56997Wv5+eefX9RqPOc5z1k0Nx6uVAijSkEhI+mcc87JJyYmoh9UhdupPe1pTyuSy1//+tfJH5aFD1b//d//Pdp292K9ULh25ZVXlrbdsmVL8cHZXNszzzxzjzahOGzh7fte9KIXRZcdPkhdWAR4xzvese/9VVVQGIr8Yv7zP/9zUdtrr712jzbhw+L99ttvfh/9y7/8S9flh8LAcFvs2C3OfvGLXyz6ED0UK8b89Kc/zTds2LDiBYVf//rXFy0zFGTGhFtq3/Wud03+wL8bBYUADJtQMHjCCSdE88Bwu4MHPOAB+Wte85qiMG1hcdhyz3fhyw3hSwVlQoHZwjwr/Pvrv/7raN+nnHLKfLtwni4Tviww12b//ffPL7744mh/H/zgBxctuywfqrq/KgoK73a3uxW5Sszv//7vL5m7vvnNb55vc+973zv6RZ05b3zjG+fbh2Nmd3/8x388//gtb3nLrl9MCgWjgygoDMfy3DJvdrObFV9Yigm59sIxLjdnX6sFhW9729vmlxu+HFT2/gKA1cecoDlBc4J7GrU5wbC+Rx111PyXonZ/z6egEGBtMidoTtCcYLlRmxMMX1AP89/hQk7dlhmKDT/5yU9WtlxYjRQUMrJ+9KMf5fe85z2XPEGFSaaHPvShRVX6ck+Mj3nMY7q2/cpXvrJoGR/96Ee7tj/55JPn24arh+zurW996/zj4aorU1NTXfv71re+tWj5YVv0s78qCgof+chHLtk+TADNtQ9XBOr2gfdTnvKUZY3h1FNPnX9OuOLkQmFfLPyQe6mruLzzne9c8YLCUEA4t7wwUbbwij5lwnG+cIwXXnjhXi3/ggsuKK4mVOW/fiZvrlAIMBrCB0bhqtFzVwfs9i8UYYVz/sKr8y31YdkPfvCDrstfeNWzcFW7sqv6zbnqqqvm24ZvRu6eb4R1CUWQKR+yLSy+e9zjHtfX/qoqKAw5RTef/vSn59sef/zxpW3C1fnm8vvwZY+lhG0Rrs4YnhO+jLTwqn4hp1o46VT2pZ+FwpXKw7G0kgWFoWByYfHqhz70oSWf8wd/8Afz7R//+Mfv9Rie+cxnVpoHhvcHKyF8OWxu24WfX/3qV1dkuQCsDHOC5gSXw5zg2p0TfPnLXz6f55133nl7PK6gEGDtMidoTtCcYLlRmhMM8+thLnfhOpd9JhA+P/jNb35T2XJhNWoO+pbLMCjHHnts9p3vfCf7z//8z+zjH/949rWvfS37n//5nz3ahcLbs846Kzv77LOzU045JXvZy162ZN9/+Id/2PXx2972tvO/12q17LGPfeyy21977bV7PP6tb31r/vdnPOMZ2djYWNf+7nOf+2SbN2/OLrroovnnh+3Rr/6q8PjHP37JNmEMF154YXQ7ff3rX5///W53u1v2s5/9bH4fz9n995vd7Gbz///hD3+4qL/zzjtv/vc/+ZM/KfZlNyeeeGL2qle9KltJF1xwwfzvf/zHf5y1Wq2u7e9xj3tkd77znbMf//jHxf/PPffc7I53vGPPyz/uuOOyn/zkJz0/HwD6odlsZm984xuzF77whdknPvGJ7Mwzz8y+/e1vZ9u2bduj7TXXXJP9xV/8RfapT30q+4//+I/s8MMP79r3EUcckd31rnddMrcLywse85jHZPV6Pdr2wAMPzPbff//s+uuvz6anp7MtW7ZkGzdunH/8Rz/60fy4w3k+5G5Lec5znpN99atf3SPv60d/VbjFLW5R5BRL5YFzyvLAn//859kVV1wxv4+Cbrng3M9b3/rW2VVXXZXt3LmzaD+X4/7Xf/1Xtn379uL3kC+ecMIJXcc3OTmZPelJT8re9773ZSvle9/7XtbpdIrfx8fHs6c97WlLPufZz3529sUvfnE+D9xb//iP/5itNuF94VOf+tT5bfe3f/u32UMf+tBBDwuACpkTNCdoTnB05wS///3vZ+95z3uK35/3vOdl97rXvQY9JABWkDlBc4KBOcHRnRP87W9/mz3xiU9cNIfdaDSK+edQD3H11VcX8/DhM4G//Mu/zN75zndmp512Wvanf/qnAx03DIqCQkbe/e53v+JfEE4S3/3ud4t/4UPec845J5uamioea7fb2ctf/vLiA8ilituOPPLIJT9QnBM+IF74ofBS7Xfs2LHH45deeun87/e85z2XtU/DZMlcAeDC5/ejvyocddRRS7ZZv3591+3005/+dP73V77ylcW/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\", \"__metadata__\": {\"image/png\": {\"width\": 1290, \"height\": 347}}}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "3316a62a9f527f445afef8fb9a060671",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Short Answer Question</strong> Which is faster: convolving with a 2D kernel, or convolving with a 1D kernel twice? Justify your response.</span>\n<span class=\"paragraph\"><strong>Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in <code>hw2.pdf</code>, clearly labeled with the problem number. If you use the PDF, write \"See hw2.pdf, Problem [number]\" in the Markdown answer cell.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "f593639dc8b58bb5b12bd5023e6dfbd2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 2(b).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "42803b1153f45b9755ebddfbfbe805f5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2c-harris-corners\">2(c) Harris corners</h2>\n<span class=\"paragraph\">Let's explore how corner detection works at each scale. Complete <code>corners_at_scale</code>: run <code>harris_corners</code> on each smoothed image, Choose default values so that <strong>exactly the 4 corners</strong> of the square are found at every <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "f4a178093fbff6c03dff9f8708f4406e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "50c9bfa059bf0e332c4fecb751bc6859",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "d56341838e6256c4f37f23a0f5843a4b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Short Answer Question: Shi\u2013Tomasi corners.</strong> Using the Shi\u2013Tomasi detector covered in class, what would you expect to change if you replaced Harris in this experiment? Compare the two corner scores, explain whether you would expect the same four square corners to be detected, and discuss whether the Harris threshold could be reused unchanged. No implementation is required.</span>\n<span class=\"paragraph\"><strong>Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in <code>hw2.pdf</code>, clearly labeled with the problem number. If you use the PDF, write \"See hw2.pdf, Problem [number]\" in the Markdown answer cell.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "745d3a8c752f5d0f81a97ad7971b3b7e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 2(c): Shi\u2013Tomasi comparison.</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "88394a55300b327c99477e71dd3cf5c9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2d-laplacian-of-gaussian-log\">2(d) Laplacian of Gaussian (LoG)</h2>\n<span class=\"paragraph\">The Laplacian of Gaussians can be used for detecting the location of \"blobs\" in images. In this problem, we will apply the Laplacian of Gaussian (LoG) operator at the same <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex> values used for Harris.</span>\n<span class=\"paragraph\">Complete <code>log_response(image, sigma)</code> to compute the Laplacian of Gaussian response. First smooth <code>image</code> using your <code>gaussian_smooth(image, sigma)</code> function, then apply the Homework 1 Laplacian kernel using <code>convolve_same</code>. Return a 2D response array with the same shape as the input image.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "31be3a355fa062c5d7317ab8b1c50ba7",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "f320333c2d3632a1a980bd957eafdd5c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Complete <code>local_extrema(response, fraction)</code> to find strong local maxima and minima. Compare absolute response values, skipping the outermost row and column. Include a pixel when both conditions hold:</span>\n<ul>\n<li>Its magnitude is at least that of all 8 neighbours. Include ties, allowing a tolerance of <marimo-tex class=\"arithmatex\">||(10^{-9}\\max|\\text{response}|||)</marimo-tex>.</li>\n<li>Its magnitude is at least <code>fraction</code> times the largest magnitude anywhere in the response.</li>\n</ul>\n<span class=\"paragraph\">Return an integer array of <code>(row, column)</code> coordinates with shape <code>(N, 2)</code>, including shape <code>(0, 2)</code> when no pixels qualify. Choose a default <code>fraction</code> between 0 and 1.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "c8e7970db01e4296602ecb48fdeae595",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "8a84a60e2a3069da091a24415c4a85ab",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "873273328600df354b3d6822a6f4a6e5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2e-difference-of-gaussian-dog\">2(e) Difference of Gaussian (DoG)</h2>\n<span class=\"paragraph\">We can approximate the LoG using a DoG.</span>\n<span class=\"paragraph\">To do this, we apply the Difference of Gaussian (DoG) operator using the same <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> values, with <marimo-tex class=\"arithmatex\">||(k \\approx 1.4||)</marimo-tex> between the two smoothing scales. Complete <code>dog_response(image, sigma, k=1.4)</code> using your <code>gaussian_smooth</code> function. Smooth the image at scales <marimo-tex class=\"arithmatex\">||(k\\sigma||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>, then subtract the smaller-scale result from the larger-scale result:</span>\n<marimo-tex class=\"arithmatex\">||[D_{\\sigma,k} = G_{k\\sigma} * I - G_\\sigma * I.||]</marimo-tex><span class=\"paragraph\">Return a 2D response array with the same shape as the input image.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "e4414c5b392aac26a5be0c5c480f1eb0",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "80f9fe48124e95a579d73356f971dcc2",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "d2442173efd271f2b0ef58e4956dfb65",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong></span>\n<span class=\"paragraph\">Compare and give explaination for the locations and counts of the DoG and LoG extrema at each scale using the plots above. Both rows use your <code>local_extrema</code> function with the same default <code>fraction</code>.</span>\n<span class=\"paragraph\"><strong>Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in <code>hw2.pdf</code>, clearly labeled with the problem number. If you use the PDF, write \"See hw2.pdf, Problem [number]\" in the Markdown answer cell.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "71770f505e50c42d1d8ce9de291913a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 2(e).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "34ff3502b5698c7e685fdcf6cc5a2a39",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"problem-3-multi-scale-blob-and-corner-detection-image-2\">Problem 3: Multi-Scale Blob and Corner Detection (Image 2)</h1>\n<span class=\"paragraph\">Consider the 512\u00d7512 Image 2 from 2(a), with four black squares of different fixed sizes. This problem will help you understand the relationship between image pyramids, the Gaussian scale-space, and blob or corner detection using the Laplacian of Gaussian (LoG) and the Difference of Gaussian (DoG). Reuse your functions from Problems 1 and 2.</span>\n<h2 id=\"3a-gaussian-smoothing-and-pyramid-construction\">3(a) Gaussian Smoothing and Pyramid Construction</h2>\n<span class=\"paragraph\">First, complete <code>downsample(image, factor)</code> to keep every <code>factor</code>-th row and column, starting at row 0 and column 0. For example, factor 2 turns a 512\u00d7512 image into a 256\u00d7256 image.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "78c9421f06e185f09a238aa266607f25",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "ceed557660d56b1fbaccafb8a867320f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Next, implement <code>build_scale_pyramid(image, sigmas)</code> to return <code>(smoothed, levels)</code>, two lists in the same order as <code>sigmas</code>: <code>smoothed[i]</code> is <code>gaussian_smooth(image, sigmas[i])</code>, and <code>levels[i]</code> is <code>smoothed[i]</code> downsampled by <code>int(sigmas[i])</code>. The preview below displays the smoothed images (top) and the pyramid levels (bottom).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LJZf",
+      "code_hash": "e81d8fb4b9f81cabede5148aa0cdb6ed",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "urSm",
+      "code_hash": "753428bea031f3b600d0d893e604f395",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "jxvo",
+      "code_hash": "8a1502681e8ea40602cc9ada0c901971",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong> comment briefly on the visual differences between levels (e.g., how edges and corners blur or disappear).</span>\n<span class=\"paragraph\"><strong>Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in <code>hw2.pdf</code>, clearly labeled with the problem number. If you use the PDF, write \"See hw2.pdf, Problem [number]\" in the Markdown answer cell.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "mWxS",
+      "code_hash": "80d7bf96c4412eadd012bbab43d4b5ac",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 3(a).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "CcZR",
+      "code_hash": "e15de30be3fc27ce3d20607e0705f002",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3b-harris-corners-at-multiple-scales\">3(b) Harris Corners at Multiple Scales</h2>\n<span class=\"paragraph\">Using the images generated in 3(a), compute the Harris corner response at each smoothing scale <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex>. We'll compare two approaches:</span>\n<ol>\n<li>Harris detector on the full-resolution, smoothed images (pure scale-space analysis).</li>\n<li>Harris detector on the corresponding downsampled images (pyramid representation).</li>\n</ol>\n<span class=\"paragraph\">Complete <code>image_2_corners(image, threshold, max_corners)</code> by calling your Homework 1 <code>harris_corners</code>, handling the white image border as in 2(c). Choose default values and use them for both approaches. The preview below runs both approaches and lists the number of corners and their median Harris response <marimo-tex class=\"arithmatex\">||(R||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "YWSi",
+      "code_hash": "a26d28da80968778b38a9ba3926d1018",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "zlud",
+      "code_hash": "1346deea657cb1580147cedd26f575d9",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "tZnO",
+      "code_hash": "b93a9b4da51dfccf0e0fa314ffa60384",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In the answer cell:</strong> discuss how corner locations, counts, and strengths vary between these two approaches.</span>\n<span class=\"paragraph\"><strong>Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in <code>hw2.pdf</code>, clearly labeled with the problem number. If you use the PDF, write \"See hw2.pdf, Problem [number]\" in the Markdown answer cell.</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xvXZ",
+      "code_hash": "a9fe008caa110c5d562596967fd644a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your answer to 3(b).</strong></span>\n<span class=\"paragraph\"><em>Double-click this cell to write your answer. You may replace everything here.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "CLip",
+      "code_hash": "4f5990213056e51f696e8fe05246cb32",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3c-laplacian-of-gaussian-log-on-the-gaussian-pyramid\">3(c) Laplacian-of-Gaussian (LoG) on the Gaussian Pyramid</h2>\n<span class=\"paragraph\">Using the Gaussian pyramid constructed in 3(a), compute the Laplacian-of-Gaussian response for each pyramid level. Each level corresponds to a downsampled version of the image that has been smoothed with a Gaussian of increasing <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex>. For each level, evaluate the LoG at the same nominal smoothing scales <marimo-tex class=\"arithmatex\">||(\\sigma \\in \\{1, 2, 4, 8\\}||)</marimo-tex>, relative to that level's resolution. Detect local extrema (both maxima and minima) that correspond to blob centres. Visualize the strongest responses as circles centred at the detected locations, with radii proportional to the effective <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> in the original image coordinates.</span>\n<blockquote>\n<span class=\"paragraph\"><strong>Note:</strong> The Laplacian-of-Gaussian (LoG) response can be computed in two conceptually different ways:</span>\n<ol>\n<li>On the original full-resolution image at multiple smoothing scales <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> (pure scale-space analysis), where only the filter scale changes, not the image sampling.</li>\n<li>On the Gaussian pyramid, where each level is both smoothed and downsampled. This approach, used in practice by methods such as SIFT, provides a computationally efficient approximation to the continuous scale-space while capturing the effects of both scale and resolution.</li>\n</ol>\n<span class=\"paragraph\">In this exercise, the LoG is applied to each downsampled pyramid level to explore how feature detection behaves under changes in both image scale and sampling resolution.</span>\n</blockquote>\n<span class=\"paragraph\">First, compute <code>effective_sigma(factor, sigma)</code>. A level downsampled by <marimo-tex class=\"arithmatex\">||(f||)</marimo-tex> was already smoothed at <marimo-tex class=\"arithmatex\">||(\\sigma = f||)</marimo-tex> in original pixels, and filtering it at <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> level pixels adds a blur of <marimo-tex class=\"arithmatex\">||(f\\sigma||)</marimo-tex> original pixels. Gaussian variances add, so the effective scale in original-image pixels is</span>\n<marimo-tex class=\"arithmatex\">||[\n\\sigma_{\\mathrm{eff}} = \\sqrt{f^2 + (f\\sigma)^2}.\n||]</marimo-tex></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "YECM",
+      "code_hash": "1b0072044a3bb3811f98e735267519b2",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "cEAS",
+      "code_hash": "58759420fc1c82a3430cf9f044713145",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Next, complete <code>pyramid_extrema(levels, factors, sigmas, method=\"log\")</code>. For every level (with downsampling factor <code>f</code>) and every <marimo-tex class=\"arithmatex\">||(\\sigma||)</marimo-tex> in <code>sigmas</code>, compute the response with <code>log_response(level, sigma)</code>, or with <code>dog_response(level, sigma)</code> when <code>method=\"dog\"</code> (used in 3(d)). Find its strongest local extrema, both maxima and minima, with your <code>local_extrema</code> from 2(d). For every extremum, append the row <code>(row, column, f, sigma_eff)</code>, where <code>(row, column)</code> is in level pixels. Return a floating-point array of shape <code>(N, 4)</code>.</span>\n<span class=\"paragraph\">The preview cell below draws each LoG extremum on Image 2 as a circle of radius <marimo-tex class=\"arithmatex\">||(\\sigma_{\\mathrm{eff}}||)</marimo-tex> centred at <marimo-tex class=\"arithmatex\">||((f \\cdot \\text{row}, f \\cdot \\text{column})||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iXej",
+      "code_hash": "63a7201029cc53abddf7268bb93ba0fd",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "EJmg",
+      "code_hash": "bae39fa54584fabac6f07cff71d0fa51",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "UmEG",
+      "code_hash": "87a73c7a2d791ad3cb28d2476632ef82",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3d-mapping-and-visualization\">3(d) Mapping and Visualization</h2>\n<span class=\"paragraph\">Map the detected feature points back to the coordinate system of the original image. The visualization code below is provided for reference and calls your <code>to_original</code> function to overlay the detections.</span>\n<span class=\"paragraph\">Complete <code>to_original(points, factor)</code> to map <code>(N, 2)</code> <code>(row, column)</code> points in a level downsampled by <code>factor</code> to original-image pixels. For example, <code>(10, 15)</code> at factor 2 maps to <code>(20, 30)</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vEBW",
+      "code_hash": "ab93038322023cc578534217978f0958",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "kLmu",
+      "code_hash": "85f3e1300e6623089e812033bcb72df6",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "IpqN",
+      "code_hash": "c320ac09ad397648b07bd4c87865a85c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dxZZ",
+      "code_hash": "6490ee2631aa2274921b788e092e86e6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"submission\">Submission</h1>\n<span class=\"paragraph\"><strong>Grading disclaimer:</strong> A score of <strong>70/70 on the autograder does not guarantee 100% on the assignment</strong>. The assignment also includes manually graded components that contribute to your final grade.</span>\n<ol>\n<li>Export this completed notebook as a Python file named exactly <strong><code>hw2.py</code></strong>.</li>\n<li>Put your Homework 1 Python file, named exactly <strong><code>hw1.py</code></strong>, in the same folder.</li>\n<li>If you handwrote any answers, include a PDF named exactly <strong><code>hw2.pdf</code></strong> in that folder. <strong>Clearly label every problem and subpart in the PDF, and write \"See hw2.pdf, Problem [number]\" in each corresponding Markdown answer cell. Illegible work will receive a zero.</strong></li>\n<li>Put these files together in <strong><code>hw2.zip</code></strong> and upload it to <strong>Gradescope</strong>.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

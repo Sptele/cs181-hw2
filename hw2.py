@@ -15,10 +15,10 @@ app = marimo.App(width="medium", auto_download=["html"])
 
 @app.cell(hide_code=True)
 def _():
-    import math
     import marimo as mo
     import matplotlib.pyplot as plt
     import numpy as np
+    import math
 
     return math, mo, np, plt
 
@@ -28,50 +28,40 @@ def _(mo):
     mo.md(r"""
     # Homework 2: Corner and Blob Detection
 
-    In this assignment you generate simple images of black squares on a white background and detect their corners and blobs.
+    In this assignment, you will generate simple images containing black squares on a white background and apply different operators for corner and blob detection. You will compare Harris, Laplacian of Gaussian (LoG), and Difference of Gaussian (DoG) detections across smoothing scales and image resolutions.
 
-    **Submission:** submit `hw2.zip` containing `hw1.py` and `hw2.py`. Keep both files in the same folder, because this homework imports your Homework 1 functions.
+    **Submission:** upload `hw2.zip` containing `hw2.py`, `hw1.py`, and `hw2.pdf` if you submit handwritten answers. Keep these files in the same folder before creating the ZIP.
 
-    **Rules:** use your Homework 1 functions `laplacian`, `convolve2d_full`, and `harris_corners`, plus the provided `harris_response(image)`. Do not use `np.convolve`, `scipy`, or `cv2`.
+    **For every short-answer question, show all steps and explain your reasoning. You may write your answer in the notebook's Markdown cell using LaTeX, or, if you prefer handwriting, include your written solutions in a PDF named exactly `hw2.pdf`. Clearly label each problem in the PDF and write "See hw2.pdf, Problem [number]" in the corresponding Markdown answer cell. Illegible work will receive a zero.**
+
+    **Rules:** use your Homework 1 functions `laplacian`, `convolve2d_full`, and `harris_corners`. Do not use `np.convolve`, `scipy`, or `cv2`.
     """)
     return
 
 
+@app.function(hide_code=True)
+def homework1_definitions():
+    """Load and cache Homework 1 helpers for importable solution functions."""
+    from contextlib import redirect_stdout
+    from io import StringIO
+    from unittest.mock import patch
+    import marimo
+    import matplotlib.pyplot as plt
+    import hw1
+
+    if not hasattr(hw1, "_hw2_definitions"):
+        with patch.object(marimo.output, "replace"), patch.object(marimo.output, "append"), patch.object(plt, "show"), redirect_stdout(StringIO()):
+            _, hw1._hw2_definitions = hw1.app.run()
+    return hw1._hw2_definitions
+
+
 @app.cell
 def _():
-    # Load hw1.py and take laplacian, convolve2d_full, and harris_corners.
-    from hw1 import app as hw1_app
-
-    _, hw1_definitions = hw1_app.run()
+    hw1_definitions = homework1_definitions()
     laplacian = hw1_definitions["laplacian"]
     convolve2d_full = hw1_definitions["convolve2d_full"]
     harris_corners = hw1_definitions["harris_corners"]
-    return convolve2d_full, harris_corners
-
-
-@app.cell
-def _(convolve2d_full, np):
-    def harris_response(image, k=0.04):
-        """Return the Harris corner response function (CRF) map of image."""
-        # Provided: the CRF computation from Homework 1, Problem 3.
-        image = np.asarray(image, dtype=float)
-        horizontal_kernel = np.array([[0.5, 0.0, -0.5]])
-        gradient_x = convolve2d_full(image, horizontal_kernel)[:, 1 : 1 + image.shape[1]]
-        gradient_y = convolve2d_full(image, horizontal_kernel.T)[1 : 1 + image.shape[0], :]
-        box = np.ones((3, 3), dtype=float) / 9
-
-        def average_3_by_3(values):
-            full = convolve2d_full(values, box)
-            return full[1 : 1 + image.shape[0], 1 : 1 + image.shape[1]]
-
-        a_xx = average_3_by_3(gradient_x * gradient_x)
-        a_xy = average_3_by_3(gradient_x * gradient_y)
-        a_yy = average_3_by_3(gradient_y * gradient_y)
-        response = a_xx * a_yy - a_xy * a_xy - k * (a_xx + a_yy) ** 2
-
-        return response
-
-    return
+    return (convolve2d_full,)
 
 
 @app.cell(hide_code=True)
@@ -91,17 +81,15 @@ def _(mo):
     A_4 = \begin{bmatrix} 1 & 3 \\ 3 & 1 \end{bmatrix}
     $$
 
-    1. Enter the four matrices in the cell below.
-    2. Complete `classify_feature(structure)`. Find the two eigenvalues by solving $\det(A - \lambda I) = 0$ yourself (no `np.linalg`), then return `"corner"`, `"edge"`, `"flat"`, or `"invalid"`.
-    3. In the answer cell, report the eigenvalues and feature type of each matrix, and state any assumptions.
+    ## 1(a) Structure Matrix
+    In the `structure_matrices` cell below, assign the four matrices given above as nested lists.
     """)
     return
 
 
 @app.cell
-def _():
+def structure_matrices():
     # EDIT BELOW: transcribe the matrices displayed above into nested lists.
-    # Replace the zero defaults with the entries of A_1, A_2, A_3, and A_4.
     structure_1 = [[3, 3], [3, 3]]
     structure_2 = [[8, 0], [0, 7]]
     structure_3 = [[1/1000, 0], [0, 1/1000]]
@@ -109,14 +97,56 @@ def _():
     return structure_1, structure_2, structure_3, structure_4
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 1(b) Eigenvalues and Feature Types
+    Solve $\det(A - \lambda I) = 0$ by hand for each matrix and show your derivation in the Markdown answer cell below. Report both eigenvalues and use them to justify whether the matrix represents a corner, edge, flat region, or an invalid structure matrix. Use an eigenvalue threshold of 1 and state the assumptions behind your classification, including what makes a structure matrix valid. Do not use code or `np.linalg` for this part.
+
+    **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    **Your answer to Problem 1(b).**
+
+    A structure matrix is valid if both eigenvalues are non-negative.
+
+    A1:
+    - eigenvalues: 6, 0
+    - Edge
+
+    A2:
+    - eigenvalues: 8, 7
+    - Corner
+
+    A3:
+    - eigenvalues: 0.001 (multiplicity 2)
+    - Flat
+
+    A4:
+    - eigenvalues: 4, -2
+    - Invalid
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 1(c) Classify Feature
+    Complete `classify_feature(structure)` using your eigenvalue derivation from 1(b). Compute the eigenvalues directly (no `np.linalg`), then return `"corner"`, `"edge"`, `"flat"`, or `"invalid"`.
+    """)
+    return
+
+
 @app.cell
 def classify_feature(math):
     def classify_feature(structure, threshold=1.0):
         """Return 'corner', 'edge', 'flat' or 'invalid' for a 2x2 structure matrix."""
-
-        # EDIT BELOW: compute both eigenvalues of [[a, b], [b, c]], then use
-        # them to decide and return the feature type or invalid.
-
 
         tr = structure[0][0] + structure[1][1]
         det = structure[0][0] * structure[1][1] - structure[0][1]**2
@@ -143,7 +173,7 @@ def classify_feature(math):
     return (classify_feature,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(classify_feature, structure_1, structure_2, structure_3, structure_4):
     try:
         print("A1:", classify_feature(structure_1))
@@ -155,30 +185,6 @@ def _(classify_feature, structure_1, structure_2, structure_3, structure_4):
     return
 
 
-@app.cell
-def _(mo):
-    mo.md(r"""
-    **Your answer to 1.**
-
-    A1:
-    - eigenvalues: 6, 0
-    - Edge
-
-    A2:
-    - eigenvalues: 8, 7
-    - Corner
-
-    A3:
-    - eigenvalues: 0.001 (multiplicity 2)
-    - Flat
-
-    A4:
-    - eigenvalues: 4, -2
-    - Invalid
-    """)
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -186,7 +192,7 @@ def _(mo):
 
     ## 2(a) Image generation
 
-    Generate two grayscale images: a white background (255) with black squares (0). Coordinates are $(x, y) = (\text{column}, \text{row})$
+    You will generate the following grayscale images using code (no images are provided). Use a white background (255) with black squares (0). Coordinates are $(x, y) = (\text{column}, \text{row})$.
 
     - **Image 1:** 100×100, one 32×32 square with top-left corner $(30, 40)$.
     - **Image 2:** 512×512, four squares:
@@ -198,13 +204,13 @@ def _(mo):
     | 3 | $(300, 100)$ | 120 |
     | 4 | $(340, 340)$ | 140 |
 
-    Complete `make_square_image` below.
+    Complete `make_square_image` below and fill in the square tuples for Image 1 and Image 2 as given above.
     """)
     return
 
 
 @app.cell
-def _(np):
+def make_square_image(np):
     def make_square_image(size, squares):
         """Return a size-by-size white image with black squares.
 
@@ -221,16 +227,27 @@ def _(np):
 
         return image
 
-    # EDIT BELOW: list the squares of each image as (x, y, side) tuples.
-    image_1 = make_square_image(100, [(30, 40, 32)])
-    image_2 = make_square_image(512, [(60, 60, 40), (180, 300, 80), (300, 100, 120), (340, 340, 140)])
+    return (make_square_image,)
+
+
+@app.cell
+def homework_squares(make_square_image):
+    # EDIT BELOW: replace each template with (x, y, side) tuples.
+    image_1_squares = [
+    	(30, 40, 32)
+    ]
+    image_2_squares = [
+        (60, 60, 40), (180, 300, 80), (300, 100, 120), (340, 340, 140)
+    ]
+    image_1 = make_square_image(100, image_1_squares)
+    image_2 = make_square_image(512, image_2_squares)
     return image_1, image_2
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Visualize the generated images:
+    Display your generated images side by side below. These images will serve as the inputs for the subsequent detection tasks.
     """)
     return
 
@@ -260,20 +277,20 @@ def _(mo):
     mo.md(r"""
     ## 2(b) Gaussian smoothing
 
-    Smooth Image 1 with $\sigma \in \{1, 2, 4, 8\}$. Complete:
+    Using the generated 100×100 single-square image, apply Gaussian smoothing at four different scales $\sigma \in \{1, 2, 4, 8\}$. These smoothed images will be used to compute the Harris Corner Response Function (CRF) and compare detected corners across scales.
 
-    - `gaussian_kernel_1d(sigma)`: a 1D Gaussian sampled at offsets $-r, \dots, r$, where $r = \lceil 3\sigma \rceil$, normalized to sum to 1.
-    - `convolve_same(image, kernel)`: use `convolve2d_full`, then crop so the output has the same size as `image`, with the kernel centred on each pixel. The border must not create fake edges: smoothing a constant image should return the same image.
-    - `gaussian_smooth(image, sigma)`: 2D Gaussian smoothing. Tip: apply the 1D kernel along the rows, then along the columns. This is much faster than a full 2D kernel.
+    Given $\sigma$, complete `gaussian_kernel_1d(sigma)` to return a vector whose entries correspond to the integer offsets $-r, -r+1, \dots, r$, where $r = \lceil 3\sigma \rceil$. At each offset $x$, the value should be the Gaussian $G_\sigma(x)$. Normalize the vector so its entries sum to 1.
+
+    For example, when $\sigma = 1$, $r = 3$, so the kernel has 7 entries corresponding to offsets $-3, -2, -1, 0, 1, 2, 3$.
     """)
     return
 
 
 @app.cell
-def _(convolve2d_full, math, np):
+def gaussian_kernel_1d(math):
     def gaussian_kernel_1d(sigma):
         """Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
-        # EDIT BELOW: compute the radius, sample g at the integer offsets, normalize.
+        import numpy as np
 
         def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
 
@@ -282,31 +299,75 @@ def _(convolve2d_full, math, np):
 
         kernel = np.zeros(k_len, dtype=float)
 
-        for i in range(kernel.shape):
+        for i in range(len(kernel)):
             kernel[i] = g(i-k_radius)
 
         return kernel / kernel.sum()
 
-    def convolve_same(image, kernel):
-        """Return the same-size convolution of image with an odd-sized 2D kernel."""
-        # EDIT BELOW: use convolve2d_full, then crop to image.shape.
-        r = convolve2d_full(image, kernel)
-
-        return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
+    return (gaussian_kernel_1d,)
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Using your `gaussian_kernel_1d(sigma)` function, complete `gaussian_kernel_2d(sigma)` to compute the 2D Gaussian kernel. Return a $(2r+1) \times (2r+1)$ array whose entries sum to 1.
+    """)
+    return
+
+
+@app.cell
+def gaussian_kernel_2d(gaussian_kernel_1d):
+    def gaussian_kernel_2d(sigma):
+        """Return the normalized 2D Gaussian kernel using gaussian_kernel_1d."""
+        import numpy as np
+
+        g = gaussian_kernel_1d(sigma)
+
+        # EDIT BELOW: construct the 2D kernel from your 1D Gaussian kernel.
+        kernel = np.outer(g, g) # are we allowed to use this?
+
+        return kernel / kernel.sum()
+
+    return (gaussian_kernel_2d,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Let's write the function for applying your 2D Gaussian filter! Complete `convolve_same(image, kernel)`: pad the image using edge replication (`np.pad(..., mode="edge")`), then use `convolve2d_full` and crop the result to the original image size, with the kernel centred on each pixel. Edge replication repeats the nearest boundary pixels, so smoothing a constant image should return the same image.
+    """)
+    return
+
+
+@app.function
+def convolve_same(image, kernel):
+    """Return the same-size convolution of image with an odd-sized 2D kernel."""
+    import numpy as np
+    convolve2d_full = homework1_definitions()["convolve2d_full"]
+
+    # EDIT BELOW: use convolve2d_full, then crop to image.shape.
+    padded = np.pad(image, (kernel.shape[0]//2, kernel.shape[1]//2), mode="edge")
+
+    return convolve2d_full(padded, kernel)[kernel.shape[0]//2:kernel.shape[0]//2 + image.shape[0], kernel.shape[1]//2:kernel.shape[1]//2 + image.shape[1]]
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Now apply it! Complete `gaussian_smooth(image, sigma)` for 2D Gaussian smoothing.
+    """)
+    return
+
+
+@app.cell
+def gaussian_smooth(gaussian_kernel_2d):
     def gaussian_smooth(image, sigma):
         """Return image smoothed by a 2D Gaussian of standard deviation sigma."""
         # EDIT BELOW: smooth with gaussian_kernel_1d and convolve_same.
-        g = gaussian_kernel_1d(sigma)
 
-        smoothed = np.zeros(image.shape, dtype=float)
+        g = gaussian_kernel_2d(sigma)
 
-        for i in range(image.shape[0]):
-            smoothed[i] = convolve_same(image[i], g)
-
-        for j in range(image.shape[1]):
-            smoothed[:, j] = convolve_same(image[:, j], g)
+        smoothed = convolve_same(image, g)
 
         return smoothed
 
@@ -337,51 +398,96 @@ def _(gaussian_smooth, image_1, mo, plt):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 2(c) Harris corners
+    **Short Answer Question** Which is faster: convolving with a 2D kernel, or convolving with a 1D kernel twice? Justify your response.
 
-    Complete `corners_at_scale`: run `harris_corners` on each smoothed image. Choose `threshold` and `max_corners` so that **exactly the 4 corners** of the square are found at every $\sigma$.
-
-    *Hint: first check what `harris_corners` detects on a black square on a white background.*
+    **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
     """)
     return
 
 
 @app.cell
-def _(harris_corners):
-    def corners_at_scale(smoothed):
-        """Return the Harris corners of a smoothed image as (row, column)."""
-        # EDIT BELOW: call harris_corners with your choice of parameters.
-        corners = harris_corners(smoothed, threshold=10, max_corners=5)
+def _(mo):
+    mo.md(r"""
+    **Your answer to 2(b).**
 
-        return corners
-
-    return (corners_at_scale,)
+    Convolving with a 1D kernel twice is faster because it
+    """)
+    return
 
 
 @app.cell(hide_code=True)
-def _(corners_at_scale, mo, plt, sigmas, smoothed_by_sigma, smoothing_error):
+def _(mo):
+    mo.md(r"""
+    ## 2(c) Harris corners
+
+    Let's explore how corner detection works at each scale. Complete `corners_at_scale`: run `harris_corners` on each smoothed image, Choose default values so that **exactly the 4 corners** of the square are found at every $\sigma$.
+    """)
+    return
+
+
+@app.function
+def corners_at_scale(smoothed, threshold=..., max_corners=...):
+    """Return the Harris corners of a smoothed image as (row, column)."""
+    import numpy as np
+    harris_corners = homework1_definitions()["harris_corners"]
+
+    # EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+    corners = ...
+
+    return corners
+
+
+@app.cell(hide_code=True)
+def _(
+    harris_max_corners,
+    harris_threshold,
+    mo,
+    plt,
+    sigmas,
+    smoothed_by_sigma,
+    smoothing_error,
+):
     try:
         if smoothing_error:
             raise RuntimeError(smoothing_error)
-        corners_by_sigma = {
-            sigma: corners_at_scale(smoothed_by_sigma[sigma]) for sigma in sigmas
-        }
-        corners_error = None
         _figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
         for _axis, _sigma in zip(_axes, sigmas):
-            _axis.imshow(smoothed_by_sigma[_sigma], cmap="gray", vmin=0, vmax=255)
-            _corners = corners_by_sigma[_sigma].reshape(-1, 2)
+            _smoothed = smoothed_by_sigma[_sigma]
+            _corners = corners_at_scale(
+                _smoothed,
+                threshold=harris_threshold.value,
+                max_corners=int(harris_max_corners.value),
+            ).reshape(-1, 2)
+            _axis.imshow(_smoothed, cmap="gray", vmin=0, vmax=255)
             _axis.scatter(_corners[:, 1], _corners[:, 0], c="r", s=18)
             _axis.set_title(f"Harris, σ = {_sigma} ({len(_corners)} found)")
             _axis.axis("off")
         plt.tight_layout()
         _display = plt.gcf()
     except Exception as error:
-        corners_by_sigma = None
-        corners_error = str(error)
         _display = mo.md(f"Problem 2(c) is not ready: {error}")
     _display
-    return corners_by_sigma, corners_error
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Short Answer Question: Shi–Tomasi corners.** Using the Shi–Tomasi detector covered in class, what would you expect to change if you replaced Harris in this experiment? Compare the two corner scores, explain whether you would expect the same four square corners to be detected, and discuss whether the Harris threshold could be reused unchanged. No implementation is required.
+
+    **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    **Your answer to 2(c): Shi–Tomasi comparison.**
+
+    *Double-click this cell to write your answer.*
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -389,49 +495,53 @@ def _(mo):
     mo.md(r"""
     ## 2(d) Laplacian of Gaussian (LoG)
 
-    - `log_response(image, sigma)`: smooth the image, then apply `laplacian` with `convolve_same`.
-    - `local_extrema(response, fraction)`: return the `(row, column)` of every pixel (skip the 1-pixel border) where
-        - \(|\text{response}|\) is at least that of all 8 neighbours (ties count, tolerance \(10^{-9} \max|\text{response}|\)), and
-        - \(|\text{response}| \ge\) `fraction` × \(\max|\text{response}|\).
+    The Laplacian of Gaussians can be used for detecting the location of "blobs" in images. In this problem, we will apply the Laplacian of Gaussian (LoG) operator at the same $\sigma \in \{1, 2, 4, 8\}$ values used for Harris.
 
-    Choose a default value for `fraction`.
+    Complete `log_response(image, sigma)` to compute the Laplacian of Gaussian response. First smooth `image` using your `gaussian_smooth(image, sigma)` function, then apply the Homework 1 Laplacian kernel using `convolve_same`. Return a 2D response array with the same shape as the input image.
     """)
     return
 
 
-@app.cell
-def _(np):
-    def log_response(image, sigma):
-        """Return the Laplacian of Gaussian response of image at scale sigma."""
-        # EDIT BELOW
-        response = ...
+@app.function
+def log_response(image, sigma):
+    """Return the Laplacian of Gaussian response of image at scale sigma."""
+    laplacian = homework1_definitions()["laplacian"]
 
-        return response
+    # EDIT BELOW
+    response = ...
 
-    # EDIT BELOW: choose a default fraction between 0 and 1.
-    def local_extrema(response, fraction=...):
-        """Return (row, column) locations of the strong local extrema of response."""
-        magnitude = np.abs(np.asarray(response, dtype=float))
-        extrema = []
-
-        # EDIT BELOW: append (row, column) for every pixel meeting the conditions above.
-
-        return np.asarray(extrema, dtype=int).reshape(-1, 2)
-
-    return local_extrema, log_response
+    return response
 
 
 @app.cell(hide_code=True)
-def _(
-    image_1,
-    local_extrema,
-    log_response,
-    mo,
-    np,
-    plt,
-    sigmas,
-    smoothing_error,
-):
+def _(mo):
+    mo.md(r"""
+    Complete `local_extrema(response, fraction)` to find strong local maxima and minima. Compare absolute response values, skipping the outermost row and column. Include a pixel when both conditions hold:
+
+    - Its magnitude is at least that of all 8 neighbours. Include ties, allowing a tolerance of $10^{-9}\max|\text{response}|$.
+    - Its magnitude is at least `fraction` times the largest magnitude anywhere in the response.
+
+    Return an integer array of `(row, column)` coordinates with shape `(N, 2)`, including shape `(0, 2)` when no pixels qualify. Choose a default `fraction` between 0 and 1.
+    """)
+    return
+
+
+@app.function
+# EDIT BELOW: choose a default fraction between 0 and 1.
+def local_extrema(response, fraction=...):
+    """Return (row, column) locations of the strong local extrema of response."""
+    import numpy as np
+
+    magnitude = np.abs(np.asarray(response, dtype=float))
+    extrema = []
+
+    # EDIT BELOW: append (row, column) for every pixel meeting the conditions above.
+
+    return np.asarray(extrema, dtype=int).reshape(-1, 2)
+
+
+@app.cell(hide_code=True)
+def _(image_1, mo, np, plt, sigmas, smoothing_error):
     try:
         if smoothing_error:
             raise RuntimeError(smoothing_error)
@@ -459,81 +569,63 @@ def _(mo):
     mo.md(r"""
     ## 2(e) Difference of Gaussian (DoG)
 
-    - `dog_response(image, sigma, k=1.4)`: \(G_{k\sigma} * I - G_\sigma * I\).
-    - `dog_log_scale(dog, log)`: the number \(c\) that best fits DoG ≈ \(c\) × LoG, i.e. minimizes \(\sum (D - c\,L)^2\).
+    We can approximate the LoG using a DoG.
 
-    **In the answer cell:**
+    To do this, we apply the Difference of Gaussian (DoG) operator using the same $\sigma$ values, with $k \approx 1.4$ between the two smoothing scales. Complete `dog_response(image, sigma, k=1.4)` using your `gaussian_smooth` function. Smooth the image at scales $k\sigma$ and $\sigma$, then subtract the smaller-scale result from the larger-scale result:
 
-    1. Compare the DoG and LoG extrema.
-    2. The table shows \(c \approx (k-1)\sigma^2\). Explain why, using \(\partial G_\sigma / \partial \sigma = \sigma \nabla^2 G_\sigma\).
+    $$D_{\sigma,k} = G_{k\sigma} * I - G_\sigma * I.$$
+
+    Return a 2D response array with the same shape as the input image.
     """)
     return
 
 
-@app.cell
-def _(np):
-    def dog_response(image, sigma, k=1.4):
-        """Return the Difference of Gaussian response of image at scale sigma."""
-        # EDIT BELOW
-        response = ...
+@app.function
+def dog_response(image, sigma, k=1.4):
+    """Return the Difference of Gaussian response of image at scale sigma."""
+    # EDIT BELOW
+    response = ...
 
-        return response
-
-    def dog_log_scale(dog, log):
-        """Return the least-squares factor c such that c * log best fits dog."""
-        dog = np.asarray(dog, dtype=float)
-        log = np.asarray(log, dtype=float)
-
-        # EDIT BELOW: the least-squares factor c.
-        scale = ...
-
-        return scale
-
-    return dog_log_scale, dog_response
+    return response
 
 
 @app.cell(hide_code=True)
-def _(
-    dog_log_scale,
-    dog_response,
-    image_1,
-    local_extrema,
-    log_by_sigma,
-    mo,
-    np,
-    plt,
-    sigmas,
-    smoothing_error,
-):
+def _(image_1, log_by_sigma, mo, np, plt, sigmas, smoothing_error):
     try:
         if smoothing_error:
             raise RuntimeError(smoothing_error)
+        if log_by_sigma is None:
+            raise RuntimeError("Complete the LoG response and extrema functions first.")
         _dog_by_sigma = {sigma: dog_response(image_1, sigma) for sigma in sigmas}
-        _figure, _axes = plt.subplots(1, 4, figsize=(13, 3.6))
-        for _axis, _sigma in zip(_axes, sigmas):
-            _response = _dog_by_sigma[_sigma]
-            _extrema = local_extrema(_response)
-            _limit = float(np.abs(_response).max()) or 1.0
-            _axis.imshow(_response, cmap="RdBu", vmin=-_limit, vmax=_limit)
-            _axis.scatter(_extrema[:, 1], _extrema[:, 0], c="k", marker="x", s=30)
-            _axis.set_title(f"DoG, σ = {_sigma}")
-            _axis.axis("off")
-        plt.tight_layout()
-        _lines = [
-            "| σ | Fitted c | (k − 1)σ² | Ratio |",
-            "|---|---|---|---|",
-        ]
-        if log_by_sigma is not None:
-            for _sigma in sigmas:
-                _scale = dog_log_scale(_dog_by_sigma[_sigma], log_by_sigma[_sigma])
-                _predicted = 0.4 * _sigma**2
-                _lines.append(
-                    f"| {_sigma} | {_scale:.3f} | {_predicted:.2f} | {_scale / _predicted:.3f} |"
-                )
-        _display = mo.vstack([plt.gcf(), mo.md("\n".join(_lines))])
+        _figure, _axes = plt.subplots(2, len(sigmas), figsize=(13, 7.2), squeeze=False)
+        for _row, (_method, _responses) in enumerate((
+            ("LoG", log_by_sigma), ("DoG", _dog_by_sigma)
+        )):
+            for _axis, _sigma in zip(_axes[_row], sigmas):
+                _response = _responses[_sigma]
+                _extrema = local_extrema(_response)
+                _limit = float(np.abs(_response).max()) or 1.0
+                _axis.imshow(_response, cmap="RdBu", vmin=-_limit, vmax=_limit)
+                _axis.scatter(_extrema[:, 1], _extrema[:, 0], c="k", marker="x", s=30)
+                _axis.set_title(f"{_method}, σ = {_sigma} ({len(_extrema)} extrema)")
+                _axis.axis("off")
+        _figure.tight_layout()
+        _display = _figure
     except Exception as error:
         _display = mo.md(f"Problem 2(e) is not ready: {error}")
     _display
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **In the answer cell:**
+
+    Compare and give explaination for the locations and counts of the DoG and LoG extrema at each scale using the plots above. Both rows use your `local_extrema` function with the same default `fraction`.
+
+    **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
+    """)
     return
 
 
@@ -550,144 +642,59 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 2(f) Corner drift
-
-    Set `true_corners_image_1` to the 4 corner pixels of the square in Image 1, as `(row, column)`. The table shows how far the strongest Harris corner from 2(c) is from the nearest true corner.
-
-    **In the answer cell:**
-
-    1. Give your `threshold`, `max_corners`, and `fraction`, with a one-sentence reason for each.
-    2. Explain how you handled the image border in 2(b) and 2(c).
-    3. How does the distance change with \(\sigma\)? In which direction does the corner move, and why?
-    """)
-    return
-
-
-@app.cell
-def _(np):
-    # EDIT BELOW: the four corner pixels of the square in Image 1, as (row, column).
-    true_corners_image_1 = ...
-
-    def nearest_corner_distance(points, true_corners):
-        """Return the distance from each point to its nearest true corner."""
-        # Provided.
-        points = np.asarray(points, dtype=float).reshape(-1, 2)
-        true_corners = np.asarray(true_corners, dtype=float).reshape(-1, 2)
-        differences = points[:, None, :] - true_corners[None, :, :]
-        distances = np.hypot(differences[..., 0], differences[..., 1]).min(axis=1)
-
-        return distances
-
-    return nearest_corner_distance, true_corners_image_1
-
-
-@app.cell(hide_code=True)
-def _(
-    corners_by_sigma,
-    corners_error,
-    mo,
-    nearest_corner_distance,
-    plt,
-    sigmas,
-    true_corners_image_1,
-):
-    try:
-        if corners_error:
-            raise RuntimeError(corners_error)
-        _lines = [
-            "| σ | Strongest corner (row, column) | Distance to nearest true corner (pixels) |",
-            "|---|---|---|",
-        ]
-        _distances = []
-        for _sigma in sigmas:
-            _corners = corners_by_sigma[_sigma].reshape(-1, 2)
-            if len(_corners) == 0:
-                _lines.append(f"| {_sigma} | none detected | |")
-                _distances.append(float("nan"))
-                continue
-            _distance = float(nearest_corner_distance(_corners[:1], true_corners_image_1)[0])
-            _distances.append(_distance)
-            _lines.append(
-                f"| {_sigma} | ({_corners[0, 0]}, {_corners[0, 1]}) | {_distance:.2f} |"
-            )
-        _figure, _axis = plt.subplots(figsize=(4.5, 3))
-        _axis.plot(sigmas, _distances, "o-")
-        _axis.set_xlabel("σ")
-        _axis.set_ylabel("Corner drift (pixels)")
-        _axis.set_xticks(sigmas)
-        plt.tight_layout()
-        _display = mo.hstack([mo.md("\n".join(_lines)), plt.gcf()], align="center")
-    except Exception as error:
-        _display = mo.md(f"Problem 2(f) is not ready: {error}")
-    _display
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""
-    **Your answer to 2(f).**
-
-    *Double-click this cell to write your answer. You may replace everything here.*
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
     # Problem 3: Multi-Scale Blob and Corner Detection (Image 2)
 
-    Reuse your Problem 2 functions on Image 2.
+    Consider the 512×512 Image 2 from 2(a), with four black squares of different fixed sizes. This problem will help you understand the relationship between image pyramids, the Gaussian scale-space, and blob or corner detection using the Laplacian of Gaussian (LoG) and the Difference of Gaussian (DoG). Reuse your functions from Problems 1 and 2.
 
-    ## 3(a) Gaussian pyramid
+    ## 3(a) Gaussian Smoothing and Pyramid Construction
 
-    For each \(\sigma \in \{1, 2, 4, 8\}\), smooth Image 2, then downsample the result by a factor of \(\sigma\) (i.e. 1, 2, 4, 8).
-
-    - `downsample(image, factor)`: keep every `factor`-th row and column, starting at `[0, 0]`.
-    - `build_scale_pyramid(image, sigmas)`: return `(smoothed, levels)`, the full-size smoothed images and their downsampled versions.
+    First, complete `downsample(image, factor)` to keep every `factor`-th row and column, starting at row 0 and column 0. For example, factor 2 turns a 512×512 image into a 256×256 image.
     """)
     return
 
 
-@app.cell
-def _():
-    def downsample(image, factor):
-        """Keep every factor-th row and column of image, starting at [0, 0]."""
-        # EDIT BELOW
-        sampled = ...
+@app.function
+def downsample(image, factor):
+    """Keep every factor-th row and column of image, starting at [0, 0]."""
+    import numpy as np
 
-        return sampled
+    # EDIT BELOW
+    sampled = ...
 
-    def build_scale_pyramid(image, sigmas):
-        """Return (smoothed, levels): full-resolution and downsampled images per sigma."""
-        # EDIT BELOW
-        smoothed = ...
-        levels = ...
-
-        return smoothed, levels
-
-    return (build_scale_pyramid,)
+    return sampled
 
 
 @app.cell(hide_code=True)
-def _(build_scale_pyramid, image_2, mo, plt, sigmas):
+def _(mo):
+    mo.md(r"""
+    Next, implement `build_scale_pyramid(image, sigmas)` to return `(smoothed, levels)`, two lists in the same order as `sigmas`: `smoothed[i]` is `gaussian_smooth(image, sigmas[i])`, and `levels[i]` is `smoothed[i]` downsampled by `int(sigmas[i])`. The preview below displays the smoothed images (top) and the pyramid levels (bottom).
+    """)
+    return
+
+
+@app.function
+def build_scale_pyramid(image, sigmas):
+    """Return (smoothed, levels): full-resolution and downsampled images per sigma."""
+    # EDIT BELOW
+    smoothed = ...
+    levels = ...
+
+    return smoothed, levels
+
+
+@app.cell(hide_code=True)
+def _(image_2, mo, plt, sigmas):
     try:
         image_2_smoothed, image_2_levels = build_scale_pyramid(image_2, sigmas)
         pyramid_error = None
-        _figure, _axes = plt.subplots(
-            2, 4, figsize=(13, 6.2), gridspec_kw={"width_ratios": [1, 1, 1, 1]}
-        )
+        _figure, _axes = plt.subplots(2, len(sigmas), figsize=(13, 6.2))
         for _column, _sigma in enumerate(sigmas):
             _axes[0, _column].imshow(image_2_smoothed[_column], cmap="gray", vmin=0, vmax=255)
             _axes[0, _column].set_title(f"Smoothed, σ = {_sigma} (512×512)")
             _level = image_2_levels[_column]
             _axes[1, _column].imshow(
                 _level, cmap="gray", vmin=0, vmax=255, interpolation="nearest",
-                extent=(0, _level.shape[1] / 512, _level.shape[0] / 512, 0),
             )
-            _axes[1, _column].set_xlim(0, 1)
-            _axes[1, _column].set_ylim(1, 0)
             _axes[1, _column].set_title(f"Level {_column}: ÷{_sigma} ({_level.shape[0]}×{_level.shape[1]})")
         for _axis in _axes.ravel():
             _axis.axis("off")
@@ -704,7 +711,9 @@ def _(build_scale_pyramid, image_2, mo, plt, sigmas):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **In the answer cell:** briefly describe how the levels differ (e.g., how edges and corners blur or disappear).
+    **In the answer cell:** comment briefly on the visual differences between levels (e.g., how edges and corners blur or disappear).
+
+    **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
     """)
     return
 
@@ -722,113 +731,97 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 3(b) Harris corners at multiple scales
+    ## 3(b) Harris Corners at Multiple Scales
 
-    Compare Harris on (i) the full-size smoothed images and (ii) the pyramid levels.
+    Using the images generated in 3(a), compute the Harris corner response at each smoothing scale $\sigma \in \{1, 2, 4, 8\}$. We'll compare two approaches:
 
-    - `to_original(points, factor)`: map `(row, column)` points in a level back to the original image.
-    - `image_2_corners(image)`: call `harris_corners` with one `threshold` and `max_corners` that works for every \(\sigma\) and level. Return only corners of the squares (Image 2 has 16).
-    - `corner_strengths(image, points)`: the CRF value at each point, using `harris_response`.
+    1. Harris detector on the full-resolution, smoothed images (pure scale-space analysis).
+    2. Harris detector on the corresponding downsampled images (pyramid representation).
+
+    Complete `image_2_corners(image, threshold, max_corners)` by calling your Homework 1 `harris_corners`, handling the white image border as in 2(c). Choose default values and use them for both approaches. The preview below runs both approaches and lists the number of corners and their median Harris response $R$.
     """)
     return
 
 
-@app.cell
-def _(harris_corners):
-    def to_original(points, factor):
-        """Map (row, column) points in a level downsampled by factor to the original image."""
-        # EDIT BELOW
-        mapped = ...
+@app.function
+def image_2_corners(image, threshold=..., max_corners=...):
+    """Return the Harris corners of a smoothed Image 2 or pyramid level as (row, column)."""
+    # EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+    corners = ...
 
-        return mapped
-
-    def image_2_corners(image):
-        """Return the Harris corners of a smoothed Image 2 or pyramid level."""
-        # EDIT BELOW: call harris_corners with your choice of parameters.
-        corners = harris_corners(image, threshold=..., max_corners=...)
-
-        return corners
-
-    def corner_strengths(image, points):
-        """Return the CRF of image at each (row, column) point."""
-        # EDIT BELOW
-        strengths = ...
-
-        return strengths
-
-    return corner_strengths, image_2_corners, to_original
+    return corners
 
 
 @app.cell(hide_code=True)
 def _(
-    corner_strengths,
-    image_2_corners,
+    convolve2d_full,
     image_2_levels,
     image_2_smoothed,
     mo,
-    nearest_corner_distance,
     np,
     plt,
     pyramid_error,
     sigmas,
-    to_original,
 ):
+    def _harris_response(image, k=0.04):
+        # The CRF of Homework 1, Problem 3, used to report corner strengths.
+        image = np.asarray(image, dtype=float)
+        kernel = np.array([[0.5, 0.0, -0.5]])
+        gradient_x = convolve2d_full(image, kernel)[:, 1 : 1 + image.shape[1]]
+        gradient_y = convolve2d_full(image, kernel.T)[1 : 1 + image.shape[0], :]
+        box = np.ones((3, 3)) / 9
+
+        def _average(values):
+            return convolve2d_full(values, box)[1 : 1 + image.shape[0], 1 : 1 + image.shape[1]]
+
+        a_xx, a_xy, a_yy = _average(gradient_x**2), _average(gradient_x * gradient_y), _average(gradient_y**2)
+        return a_xx * a_yy - a_xy**2 - k * (a_xx + a_yy) ** 2
+
     try:
         if pyramid_error:
             raise RuntimeError(pyramid_error)
-        _true_corners = np.array(
-            [
-                (_y + _dy, _x + _dx)
-                for _x, _y, _side in ((60, 60, 40), (180, 300, 80), (300, 100, 120), (340, 340, 140))
-                for _dy in (0, _side - 1)
-                for _dx in (0, _side - 1)
-            ]
-        )
+        # (i) corners are in full-resolution pixels; (ii) corners are in level pixels.
         image_2_corners_full = {}
         image_2_corners_pyramid = {}
         _lines = [
-            "| σ | Corners (i) | Corners (ii) | Median R (i) | Median R (ii) "
-            "| Median distance to true corner (i) | (ii) |",
-            "|---|---|---|---|---|---|---|",
+            "| σ | Corners (i) | Corners (ii) | Median R (i) | Median R (ii) |",
+            "|---|---|---|---|---|",
         ]
-        _figure, _axes = plt.subplots(1, 4, figsize=(14, 3.9))
-        for _axis, _index, _sigma in zip(_axes, range(len(sigmas)), sigmas):
-            _full = image_2_corners(image_2_smoothed[_index]).reshape(-1, 2)
-            _level_corners = image_2_corners(image_2_levels[_index]).reshape(-1, 2)
-            _pyramid = to_original(_level_corners, _sigma)
-            image_2_corners_full[_sigma] = _full
-            image_2_corners_pyramid[_sigma] = _pyramid
-            _strength_full = corner_strengths(image_2_smoothed[_index], _full)
-            _strength_pyramid = corner_strengths(image_2_levels[_index], _level_corners)
-            _distance_full = np.median(nearest_corner_distance(_full, _true_corners))
-            _distance_pyramid = np.median(nearest_corner_distance(_pyramid, _true_corners))
+        _figure, _axes = plt.subplots(2, len(sigmas), figsize=(14, 7.4), squeeze=False)
+        for _index, _sigma in enumerate(sigmas):
+            _strengths = []
+            for _row, (_image, _store, _name) in enumerate((
+                (image_2_smoothed[_index], image_2_corners_full, "(i) full resolution"),
+                (image_2_levels[_index], image_2_corners_pyramid, "(ii) pyramid"),
+            )):
+                _points = np.asarray(image_2_corners(_image), dtype=int).reshape(-1, 2)
+                _store[_sigma] = _points
+                _values = _harris_response(_image)[_points[:, 0], _points[:, 1]]
+                _strengths.append(float(np.median(_values)) if len(_values) else float("nan"))
+                _axis = _axes[_row, _index]
+                _axis.imshow(_image, cmap="gray", vmin=0, vmax=255, interpolation="nearest")
+                _axis.scatter(_points[:, 1], _points[:, 0], s=18, c="r")
+                _axis.set_title(f"{_name}, σ = {_sigma} ({len(_points)} found)", fontsize=9)
+                _axis.axis("off")
             _lines.append(
-                f"| {_sigma} | {len(_full)} | {len(_pyramid)} | {np.median(_strength_full):.3g} "
-                f"| {np.median(_strength_pyramid):.3g} | {_distance_full:.1f} | {_distance_pyramid:.1f} |"
+                f"| {_sigma} | {len(image_2_corners_full[_sigma])} | {len(image_2_corners_pyramid[_sigma])} "
+                f"| {_strengths[0]:.3g} | {_strengths[1]:.3g} |"
             )
-            _axis.imshow(image_2_smoothed[_index], cmap="gray", vmin=0, vmax=255)
-            _axis.scatter(_full[:, 1], _full[:, 0], s=22, facecolors="none", edgecolors="r", label="(i) scale space")
-            _axis.scatter(_pyramid[:, 1], _pyramid[:, 0], s=22, c="c", marker="x", label="(ii) pyramid")
-            _axis.set_title(f"σ = {_sigma}")
-            _axis.axis("off")
-        _axes[0].legend(loc="lower left", fontsize=8)
         plt.tight_layout()
         _display = mo.vstack([plt.gcf(), mo.md("\n".join(_lines))])
     except Exception as error:
         image_2_corners_full = image_2_corners_pyramid = None
         _display = mo.md(f"Problem 3(b) is not ready: {error}")
     _display
-    return
+    return image_2_corners_full, image_2_corners_pyramid
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **In the answer cell:**
+    **In the answer cell:** discuss how corner locations, counts, and strengths vary between these two approaches.
 
-    1. How do corner locations, counts, and strengths differ between (i) and (ii)?
-    2. Why are the pyramid CRF values larger?
-    3. Why do the two approaches disagree at \(\sigma = 8\)?
+    **Show all steps. Answer in the Markdown cell below using LaTeX, or handwrite your solution in `hw2.pdf`, clearly labeled with the problem number. If you use the PDF, write "See hw2.pdf, Problem [number]" in the Markdown answer cell.**
     """)
     return
 
@@ -846,197 +839,175 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 3(c) LoG and DoG on the Gaussian pyramid
+    ## 3(c) Laplacian-of-Gaussian (LoG) on the Gaussian Pyramid
 
-    Apply LoG and DoG to each pyramid level with \(\sigma \in \{1, 2, 4, 8\}\) (in level pixels) to find blob centres. First decide: is the centre of a dark square a **maximum** or a **minimum** of the response?
+    Using the Gaussian pyramid constructed in 3(a), compute the Laplacian-of-Gaussian response for each pyramid level. Each level corresponds to a downsampled version of the image that has been smoothed with a Gaussian of increasing $\sigma$. For each level, evaluate the LoG at the same nominal smoothing scales $\sigma \in \{1, 2, 4, 8\}$, relative to that level's resolution. Detect local extrema (both maxima and minima) that correspond to blob centres. Visualize the strongest responses as circles centred at the detected locations, with radii proportional to the effective $\sigma$ in the original image coordinates.
 
-    - `effective_sigma(level_sigma, factor, sigma)`: the total scale in original pixels, \(\sigma_\text{eff} = \sqrt{\sigma_\ell^2 + (f\sigma)^2}\).
-    - `normalized_log(level, level_sigma, factor, sigma)`: \(s^2 \times\) `log_response(level, sigma)` with \(s = \sigma_\text{eff} / f\), so that different scales can be compared.
-    - `dark_blob_candidates(response)`: pixels (skip the border) that are local extrema of the sign you chose (compared with all 8 neighbours, ties allowed), with magnitude at least \(10^{-6}\) × the largest magnitude of that sign.
-    - `pyramid_blobs(levels, factors, sigmas, method="log", k=1.4)`: for every level and \(\sigma\), return rows `(row, column, sigma_eff, strength)` in original coordinates.
-        - Response: `normalized_log` for LoG, `dog_response / (k - 1)` for DoG.
-        - Strength: the magnitude of the response.
-        - The level with factor \(f\) has \(\sigma_\ell = f\).
-    - `suppress_overlaps(blobs, fraction)`: go from strongest to weakest blob, and keep a blob only if its centre is farther than \(\sqrt{2}\max(\sigma_\text{eff}, \sigma_\text{eff}')\) from every blob already kept. Return the kept blobs with strength at least `fraction` × the strongest.
+    > **Note:** The Laplacian-of-Gaussian (LoG) response can be computed in two conceptually different ways:
+    >
+    > 1. On the original full-resolution image at multiple smoothing scales $\sigma$ (pure scale-space analysis), where only the filter scale changes, not the image sampling.
+    > 2. On the Gaussian pyramid, where each level is both smoothed and downsampled. This approach, used in practice by methods such as SIFT, provides a computationally efficient approximation to the continuous scale-space while capturing the effects of both scale and resolution.
+    >
+    > In this exercise, the LoG is applied to each downsampled pyramid level to explore how feature detection behaves under changes in both image scale and sampling resolution.
+
+    First, compute `effective_sigma(factor, sigma)`. A level downsampled by $f$ was already smoothed at $\sigma = f$ in original pixels, and filtering it at $\sigma$ level pixels adds a blur of $f\sigma$ original pixels. Gaussian variances add, so the effective scale in original-image pixels is
+
+    $$
+    \sigma_{\mathrm{eff}} = \sqrt{f^2 + (f\sigma)^2}.
+    $$
     """)
     return
 
 
-@app.cell
-def _(np):
-    def effective_sigma(level_sigma, factor, sigma):
-        """Return the scale, in original pixels, of sigma applied to a pyramid level."""
-        # EDIT BELOW
-        sigma_eff = ...
+@app.function
+def effective_sigma(factor, sigma):
+    """Return the scale, in original pixels, of sigma applied to the level downsampled by factor."""
+    import numpy as np
 
-        return sigma_eff
+    # EDIT BELOW
+    sigma_eff = ...
 
-    def normalized_log(level, level_sigma, factor, sigma):
-        """Return the scale-normalized LoG of a pyramid level."""
-        # EDIT BELOW
-        response = ...
-
-        return response
-
-    def dark_blob_candidates(response):
-        """Return (row, column) of the local extrema of response at dark blob centres."""
-        # EDIT BELOW
-        candidates = ...
-
-        return candidates
-
-    def pyramid_blobs(levels, factors, sigmas, method="log", k=1.4):
-        """Return (row, column, sigma_eff, strength) for every blob candidate."""
-        # EDIT BELOW
-        blobs = []
-        # Append (row, column, sigma_eff, strength) for every candidate.
-
-        return np.asarray(blobs, dtype=float).reshape(-1, 4)
-
-    # EDIT BELOW: choose a default fraction between 0 and 1.
-    def suppress_overlaps(blobs, fraction=...):
-        """Keep the strongest non-overlapping blobs above fraction of the strongest."""
-        blobs = np.asarray(blobs, dtype=float).reshape(-1, 4)
-
-        # EDIT BELOW
-        kept = ...
-
-        return kept
-
-    return effective_sigma, pyramid_blobs, suppress_overlaps
+    return sigma_eff
 
 
 @app.cell(hide_code=True)
-def _(effective_sigma, mo, sigmas):
-    try:
-        _lines = [
-            "| Level (f) | σ = 1 | σ = 2 | σ = 4 | σ = 8 |",
-            "|---|---|---|---|---|",
-        ]
-        for _factor in sigmas:
-            _row = [f"{effective_sigma(_factor, _factor, _sigma):.1f}" for _sigma in sigmas]
-            _lines.append(f"| {_factor} | " + " | ".join(_row) + " |")
-        _display = mo.md("**Effective scale σ_eff (original pixels)**\n\n" + "\n".join(_lines))
-    except Exception as error:
-        _display = mo.md(f"Effective-scale table is not ready: {error}")
-    _display
+def _(mo):
+    mo.md(r"""
+    Next, complete `pyramid_extrema(levels, factors, sigmas, method="log")`. For every level (with downsampling factor `f`) and every $\sigma$ in `sigmas`, compute the response with `log_response(level, sigma)`, or with `dog_response(level, sigma)` when `method="dog"` (used in 3(d)). Find its strongest local extrema, both maxima and minima, with your `local_extrema` from 2(d). For every extremum, append the row `(row, column, f, sigma_eff)`, where `(row, column)` is in level pixels. Return a floating-point array of shape `(N, 4)`.
+
+    The preview cell below draws each LoG extremum on Image 2 as a circle of radius $\sigma_{\mathrm{eff}}$ centred at $(f \cdot \text{row}, f \cdot \text{column})$.
+    """)
     return
 
 
+@app.function
+def pyramid_extrema(levels, factors, sigmas, method="log"):
+    """Return (row, column, factor, sigma_eff) for the extrema of every level and scale."""
+    import numpy as np
+
+    extrema = []
+    # EDIT BELOW
+
+    return np.asarray(extrema, dtype=float).reshape(-1, 4)
+
+
 @app.cell(hide_code=True)
-def _(
-    image_2_levels,
-    mo,
-    np,
-    pyramid_blobs,
-    pyramid_error,
-    sigmas,
-    suppress_overlaps,
-):
-    _centres = {
-        "square 1 (side 40)": (79.5, 79.5),
-        "square 2 (side 80)": (339.5, 219.5),
-        "square 3 (side 120)": (159.5, 359.5),
-        "square 4 (side 140)": (409.5, 409.5),
-    }
-
-    def _nearest_square(row, column):
-        return min(_centres, key=lambda name: np.hypot(row - _centres[name][0], column - _centres[name][1]))
-
+def _(image_2, image_2_levels, mo, plt, pyramid_error, sigmas):
     try:
         if pyramid_error:
             raise RuntimeError(pyramid_error)
-        image_2_blobs = {}
-        _tables = []
-        for _method in ("log", "dog"):
-            _candidates = pyramid_blobs(image_2_levels, sigmas, sigmas, method=_method)
-            image_2_blobs[_method] = suppress_overlaps(_candidates)
-            _lines = [
-                f"**{_method.upper()}: {len(_candidates)} candidates, {len(image_2_blobs[_method])} kept**",
-                "",
-                "| (row, column) | σ_eff | Strength | Nearest square |",
-                "|---|---|---|---|",
-            ]
-            for _row, _column, _sigma_eff, _strength in image_2_blobs[_method]:
-                _lines.append(
-                    f"| ({_row:.0f}, {_column:.0f}) | {_sigma_eff:.1f} | {_strength:.1f} "
-                    f"| {_nearest_square(_row, _column)} |"
-                )
-            _tables.append(mo.md("\n".join(_lines)))
-        _display = mo.hstack(_tables, align="start")
+        image_2_blobs = {
+            method: pyramid_extrema(image_2_levels, sigmas, sigmas, method=method)
+            for method in ("log", "dog")
+        }
+        _figure, _axes = plt.subplots(2, 2, figsize=(10, 10))
+        for _index, (_axis, _factor) in enumerate(zip(_axes.flat, sigmas)):
+            _axis.imshow(image_2, cmap="gray", vmin=0, vmax=255)
+            _count = 0
+            for _row, _column, _level_factor, _sigma_eff in image_2_blobs["log"]:
+                if _level_factor != _factor:
+                    continue
+                _axis.add_patch(plt.Circle(
+                    (_factor * _column, _factor * _row), _sigma_eff,
+                    fill=False, color=f"C{_index}", linewidth=1.2,
+                ))
+                _count += 1
+            _axis.set_title(f"Level f = {_factor}: {_count} LoG extrema", color=f"C{_index}")
+            _axis.axis("off")
+        _figure.tight_layout()
+        _display = _figure
     except Exception as error:
         image_2_blobs = None
         _display = mo.md(f"Problem 3(c) is not ready: {error}")
     _display
+    return (image_2_blobs,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 3(d) Mapping and Visualization
+
+    Map the detected feature points back to the coordinate system of the original image. The visualization code below is provided for reference and calls your `to_original` function to overlay the detections.
+
+    Complete `to_original(points, factor)` to map `(N, 2)` `(row, column)` points in a level downsampled by `factor` to original-image pixels. For example, `(10, 15)` at factor 2 maps to `(20, 30)`.
+    """)
+    return
+
+
+@app.function
+def to_original(points, factor):
+    """Map (row, column) points in a level downsampled by factor to the original image."""
+    import numpy as np
+
+    # EDIT BELOW
+    mapped = ...
+
+    return mapped
+
+
+@app.cell
+def _(plt):
+    # For reference only: this visualization is provided for you.
+    def plot_detections(image, corners_full, corners_pyramid, blobs, c=1.0):
+        """Show corners and blobs on the original image."""
+        import numpy as np
+
+        figure, axis = plt.subplots()
+        axis.imshow(image, cmap="gray")
+
+        # Full-resolution corners already use original-image coordinates (red dots).
+        for points in corners_full.values():
+            points = np.asarray(points).reshape(-1, 2)
+            axis.scatter(points[:, 1], points[:, 0], color="red")
+
+        # Map pyramid corners back to the original image (blue crosses).
+        for factor, points in corners_pyramid.items():
+            points = to_original(points, factor)
+            axis.scatter(points[:, 1], points[:, 0], color="blue", marker="x")
+
+        # Draw each blob as a circle: green for LoG, orange for DoG.
+        for method, color in (("log", "green"), ("dog", "orange")):
+            for row, column, factor, scale in blobs[method]:
+                row, column = to_original([(row, column)], factor)[0]
+                circle = plt.Circle((column, row), c * scale, fill=False, color=color)
+                axis.add_patch(circle)
+
+        return figure
+
+    return (plot_detections,)
+
+
+@app.cell(hide_code=True)
+def _(
+    image_2,
+    image_2_blobs,
+    image_2_corners_full,
+    image_2_corners_pyramid,
+    mo,
+    plot_detections,
+):
+    try:
+        if image_2_corners_full is None or image_2_blobs is None:
+            raise RuntimeError("Complete 3(b) and 3(c) first.")
+        _display = plot_detections(image_2, image_2_corners_full, image_2_corners_pyramid, image_2_blobs)
+    except Exception as error:
+        _display = mo.md(f"Problem 3(d) is not ready: {error}")
+    _display
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **In the answer cell:**
+    # Submission
 
-    1. Which \(\sigma_\text{eff}\) is selected for each square, and how does it relate to the side length?
-    2. Do LoG and DoG select the same blobs?
-    """)
-    return
+    **Grading disclaimer:** A score of **70/70 on the autograder does not guarantee 100% on the assignment**. The assignment also includes manually graded components that contribute to your final grade.
 
-
-@app.cell
-def _(mo):
-    mo.md(r"""
-    **Your answer to 3(c).**
-
-    *Double-click this cell to write your answer. You may replace everything here.*
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## 3(d) Mapping and visualization
-
-    In the cell below, draw all detections on Image 2 in original coordinates:
-
-    - **Left:** Harris corners from (i) and (ii), with a different colour or marker for each \(\sigma\).
-    - **Right:** LoG and DoG blobs as circles of radius \(r = c\,\sigma_\text{eff}\), where \(c\) is a constant you choose for visibility.
-    """)
-    return
-
-
-@app.cell
-def _(image_2, plt):
-    # EDIT BELOW: overlay every detection on Image 2.
-    _figure, (_corner_axis, _blob_axis) = plt.subplots(1, 2, figsize=(13, 6.5))
-    for _axis in (_corner_axis, _blob_axis):
-        _axis.imshow(image_2, cmap="gray", vmin=0, vmax=255)
-        _axis.set_xticks([])
-        _axis.set_yticks([])
-
-    # Left axis: Harris corners from image_2_corners_full and image_2_corners_pyramid.
-
-    # Right axis: LoG and DoG blobs from image_2_blobs, drawn as circles.
-
-    plt.tight_layout()
-    plt.gcf()
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **In the answer cell:** what does the overlay show about detecting features at a single scale versus across scales?
-    """)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""
-    **Your answer to 3(d).**
-
-    *Double-click this cell to write your answer. You may replace everything here.*
+    1. Export this completed notebook as a Python file named exactly **`hw2.py`**.
+    2. Put your Homework 1 Python file, named exactly **`hw1.py`**, in the same folder.
+    3. If you handwrote any answers, include a PDF named exactly **`hw2.pdf`** in that folder. **Clearly label every problem and subpart in the PDF, and write "See hw2.pdf, Problem [number]" in each corresponding Markdown answer cell. Illegible work will receive a zero.**
+    4. Put these files together in **`hw2.zip`** and upload it to **Gradescope**.
     """)
     return
 

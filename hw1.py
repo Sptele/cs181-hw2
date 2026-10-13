@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.25.1"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -220,23 +220,26 @@ def _(np):
 
         output = np.empty(output_shape, dtype=float)
 
-        offsets = range(-(len(kernel)//2), len(kernel)//2+1)
-        offset = offsets[-1]
+        x_offsets = range(-(kernel.shape[1]//2), kernel.shape[1]//2+1)
+        x_offset = x_offsets[-1]
+
+        y_offsets = range(-(kernel.shape[0]//2), kernel.shape[0]//2+1)
+        y_offset = y_offsets[-1]
 
         for y in range(output_shape[0]):
             for x in range(output_shape[1]):
                 output[y,x] = 0
 
-                for ky in offsets:
-                    for kx in offsets:
-                        img_y = y-ky-offset
-                        img_x = x-kx-offset
+                for ky in y_offsets:
+                    for kx in x_offsets:
+                        img_y = y-ky-y_offset
+                        img_x = x-kx-x_offset
 
                         if img_y < 0 or img_x < 0 or img_y >= image.shape[0] or img_x >= image.shape[1]:
                             pass
                         else: 
-                            output[y, x] += kernel[ky+offset, kx+offset] * image[img_y, img_x]
-        
+                            output[y, x] += kernel[ky+y_offset, kx+x_offset] * image[img_y, img_x]
+    
 
         return output
 
@@ -416,7 +419,7 @@ def build_laplacian_pyramid(np):
 
         rtnr = pyramid[::-1]
         rtnr.append(rvr[0])
-    
+
         return rtnr
 
     return (build_laplacian_pyramid,)
@@ -509,38 +512,20 @@ def harris_corners(convolve2d_full, np, sobel_x, sobel_y):
         s_y = crop_convolve(image, sobel_y)
 
         def smooth(img):
-            def averaged(i, j):
-                avg = 0
-
-                for io in [-1, 0, 1]:
-                    for jo in [-1, 0, 1]:
-                        if i+io < 0 or j+jo < 0 or i+io >= img.shape[0] or j+jo >= img.shape[1]:
-                            continue
-
-                        else:
-                            avg += img[i+io, j+jo]
-
-
-                return avg / 9
-
-            for i in range(img.shape[0]):
-                for j in range(img.shape[1]):
-                    img[i, j] = averaged(i, j)
-
-            return img
+            return crop_convolve(img, np.ones((3,3), dtype=float)/9)
 
 
         Sx2 = smooth(s_x ** 2)
         Sy2 = smooth(s_y ** 2)
         Sxy = smooth(s_x*s_y)
-    
+
 
         rtnr = []
 
         for i in range(s_x.shape[0]):
             for j in range(s_x.shape[1]):
                 R = (Sx2[i,j]*Sy2[i,j]-Sxy[i,j]**2) - k*((Sx2[i,j]+Sy2[i,j])**2)
-               
+           
                 if R >= threshold:
                     rtnr.append((R, i, j))
 
