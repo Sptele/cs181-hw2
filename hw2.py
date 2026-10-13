@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.25.1"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -360,7 +360,12 @@ def convolve_same(image, kernel):
 
 	r = convolve2d_full(padded, kernel)
 
-	return r[kernel.shape[0]:kernel.shape[0] + image.shape[0]-1, kernel.shape[1]:kernel.shape[1] + image.shape[1]-1]
+	image_start_x = kernel.shape[0]//2 + kernel.shape[0]//2
+	image_start_y = kernel.shape[1]//2 + kernel.shape[1]//2
+
+	s = r[image_start_x:image_start_x + image.shape[0], image_start_y:image_start_y + image.shape[1]]
+
+	return s
 
 
 @app.cell(hide_code=True)
@@ -437,28 +442,77 @@ def _(mo):
     return
 
 
-@app.function
-def corners_at_scale(smoothed, threshold=..., max_corners=...):
-	"""Return the Harris corners of a smoothed image as (row, column)."""
-	import numpy as np
-	harris_corners = homework1_definitions()["harris_corners"]
+@app.cell
+def corners_at_scale(convolve2d_full, np):
+    def new_hc(image, threshold, max_corners=40, k=0.04):
+    	"""Return up to max_corners Harris corners as (row, column) locations."""
+    	# EDIT BELOW: write your complete detector and any helpers here.
 
-	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
-	corners = ...
+    	sobel_x = homework1_definitions()["sobel_x"]
+    	sobel_y = homework1_definitions()["sobel_y"]
 
-	return corners
+    	def edge_convolve(image, kernel):
+    		edged = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
+
+		
+
+    	def crop_convolve(image, kernel):
+    		padded = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
+
+    		# how large is either side of the kernel?
+
+    		r = convolve2d_full(padded, kernel)
+
+    		return r[kernel.shape[0]:kernel.shape[0] + image.shape[0]-1, kernel.shape[1]:kernel.shape[1] + image.shape[1]-1]
+
+
+
+    	# We will use Sobel X and Sobel Y
+
+
+    	s_x = crop_convolve(image, sobel_x)
+    	s_y = crop_convolve(image, sobel_y)
+
+
+    	def smooth(img):
+    		return crop_convolve(img, np.ones((3,3), dtype=float)/9)
+
+    	Sx2 = smooth(s_x ** 2)
+    	Sy2 = smooth(s_y ** 2)
+    	Sxy = smooth(s_x*s_y)
+
+    	R = (((Sx2*Sy2-Sxy**2) - k * ((Sx2+Sy2)**2)))
+	
+    	filtr = np.where(R >= threshold, R, 0)
+
+    	rtnr = []
+    	for i in range(filtr.shape[0]):
+    		for j in range(filtr.shape[1]):
+
+    			if (filtr[i,j] >= threshold):
+    				rtnr.append((filtr[i,j], i, j))
+
+    	rtnr.sort()
+
+    	print(rtnr)
+
+    	return np.array(rtnr[:max_corners])[:, 1:]
+
+    def corners_at_scale(smoothed, threshold=1000, max_corners=4):
+    	"""Return the Harris corners of a smoothed image as (row, column)."""
+    	import numpy as np
+    	harris_corners = homework1_definitions()["harris_corners"]
+
+    	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+    	corners = harris_corners(smoothed, threshold, max_corners)
+
+    	return corners
+
+    return (corners_at_scale,)
 
 
 @app.cell(hide_code=True)
-def _(
-    harris_max_corners,
-    harris_threshold,
-    mo,
-    plt,
-    sigmas,
-    smoothed_by_sigma,
-    smoothing_error,
-):
+def _(corners_at_scale, mo, plt, sigmas, smoothed_by_sigma, smoothing_error):
     try:
     	if smoothing_error:
     		raise RuntimeError(smoothing_error)
@@ -467,8 +521,8 @@ def _(
     		_smoothed = smoothed_by_sigma[_sigma]
     		_corners = corners_at_scale(
     			_smoothed,
-    			threshold=harris_threshold.value,
-    			max_corners=int(harris_max_corners.value),
+    			# threshold=harris_threshold.value,
+    			# max_corners=int(harris_max_corners.value),
     		).reshape(-1, 2)
     		_axis.imshow(_smoothed, cmap="gray", vmin=0, vmax=255)
     		_axis.scatter(_corners[:, 1], _corners[:, 0], c="r", s=18)
@@ -477,6 +531,7 @@ def _(
     	plt.tight_layout()
     	_display = plt.gcf()
     except Exception as error:
+    	error.print_exc()
     	_display = mo.md(f"Problem 2(c) is not ready: {error}")
     _display
     return

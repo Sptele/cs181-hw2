@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.25.1"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -502,15 +502,29 @@ def harris_corners(convolve2d_full, np, sobel_x, sobel_y):
     	# EDIT BELOW: write your complete detector and any helpers here.
 
     	def crop_convolve(image, kernel):
-    		r = convolve2d_full(image, kernel)
+    		import numpy as np
+    		# EDIT BELOW: use convolve2d_full, then crop to image.shape.
+    		padded = np.pad(image, pad_width=((kernel.shape[0]//2), (kernel.shape[1]//2)), mode="edge")
 
-    		return r[kernel.shape[0]//2:(r.shape[0]-(kernel.shape[0]//2)), kernel.shape[1]//2:(r.shape[1]-(kernel.shape[1]//2))]
+    		# how large is either side of the kernel?
+
+    		r = convolve2d_full(padded, kernel)
+
+    		image_start_x = kernel.shape[0]//2 + kernel.shape[0]//2
+    		image_start_y = kernel.shape[1]//2 + kernel.shape[1]//2
+
+    		s = r[image_start_x:image_start_x + image.shape[0], image_start_y:image_start_y + image.shape[1]]
+
+    		return s
+
 
 
     	# We will use Sobel X and Sobel Y
 
+
     	s_x = crop_convolve(image, sobel_x)
     	s_y = crop_convolve(image, sobel_y)
+
 
     	def smooth(img):
     		return crop_convolve(img, np.ones((3,3), dtype=float)/9)
@@ -531,6 +545,8 @@ def harris_corners(convolve2d_full, np, sobel_x, sobel_y):
     				rtnr.append((R, i, j))
 
     	rtnr.sort(reverse=True)
+
+    	# add non max suppression
 
     	return np.array(rtnr[:max_corners])[:,1:]  
 
