@@ -161,7 +161,7 @@ def classify_feature(math):
     	disc = tr**2 - 4*det
 
     	if disc < 0:
-    	    return "invalid"
+    		return "invalid"
 
     	e1: float = (tr + math.sqrt(disc))/2
     	e2: float = (tr - math.sqrt(disc))/2
@@ -297,20 +297,20 @@ def _(mo):
 @app.cell
 def gaussian_kernel_1d(math):
     def gaussian_kernel_1d(sigma):
-        """Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
-        import numpy as np
+    	"""Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
+    	import numpy as np
 
-        def g(x): return math.exp(-((x**2)/(2*(sigma**2))))
+    	def g(x): return math.exp(-((x**2)/(2*(sigma**2)))) / (sigma * np.sqrt(2*np.pi))
 
-        k_radius = math.ceil(3*sigma)
-        k_len = 2*k_radius+1
+    	k_radius = math.ceil(3*sigma)
+    	k_len = 2*k_radius+1
 
-        kernel = np.zeros(k_len, dtype=float)
+    	kernel = np.zeros(k_len, dtype=float)
 
-        for i in range(len(kernel)):
-            kernel[i] = g(i-k_radius)
+    	for i in range(len(kernel)):
+    		kernel[i] = g(i-k_radius)
 
-        return kernel / kernel.sum()
+    	return kernel / kernel.sum()
 
     return (gaussian_kernel_1d,)
 
@@ -384,7 +384,8 @@ def gaussian_smooth(gaussian_kernel_1d):
 
     	g = gaussian_kernel_1d(sigma)
 
-    	smoothed = convolve_same(image, g)
+    	smoothed = convolve_same(image, g.reshape(1,-1))
+    	smoothed = convolve_same(smoothed, g.reshape(-1,1))
 
     	return smoothed
 
@@ -495,7 +496,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 2(c): Shi–Tomasi comparison.**
 
-    _Double-click this cell to write your answer._
+    I would expect little to no change in the detected corners because both methods ultimately rely on the eigenvalues of the structure matrix, but just in different ways. The Shi-Tomasi's corner score is simply the minimum eigenvalue, while Harris uses a combination based on the determinant and trace of the structure matrix. Because they use the same eigenvalues, they should detect the same four corners. However, the Harris threshold can't be reused unchanged because the scoring *is* different, so the threshold needs to be updated to account for the different basis in scoring (eigenvalue vs. trace/determinant).
     """)
     return
 
@@ -726,16 +727,16 @@ def _(mo):
 
 
 @app.cell
-def build_scale_pyramid(gaussian_smooth, np):
+def build_scale_pyramid(gaussian_smooth):
     def build_scale_pyramid(image, sigmas):
     	"""Return (smoothed, levels): full-resolution and downsampled images per sigma."""
     	# EDIT BELOW
-    	smoothed = np.empty(len(sigmas), dtype=object)
-    	levels = np.empty(shape=len(sigmas), dtype=object)
-
+    	smoothed = []
+    	levels = []
+ 
     	for i in range(len(sigmas)):
-    		smoothed[i] = gaussian_smooth(image, sigmas[i])
-    		levels[i] = downsample(smoothed[i], int(sigmas[i]))
+    		smoothed.append(gaussian_smooth(image, sigmas[i]))
+    		levels.append(downsample(smoothed[i], int(sigmas[i])))
 
     	return smoothed, levels
 
@@ -784,7 +785,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 3(a).**
 
-    As we increment the level, the edges & corners blur; blur compounds on previous blur to have exponentially more blur. Specifically, the blur seems to be aliased and very pixelated, which is likely due to the downsampling skipping rows & columns.
+    As we increment the level, the edges & corners blur; blur compounds on previous blur to have exponentially more blur. Specifically, the blur seems to be aliased and very pixelated, which is likely due to the downsampling skipping rows & columns to leave us with less detail to smoothly blur. The corners are more visible because of the pixelation (especially compared to the smoothed versions), but they're still a bit blurry. Overall, the aliasing isn't too bad until level 3; from levels 0-2, it's fairly close to the original.
     """)
     return
 
@@ -806,7 +807,7 @@ def _(mo):
 
 @app.cell
 def image_2_corners(harris_corners):
-    def image_2_corners(image, threshold=.45, max_corners=40):
+    def image_2_corners(image, threshold=100, max_corners=40):
     	"""Return the Harris corners of a smoothed Image 2 or pyramid level as (row, column)."""
     	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
     	corners = harris_corners(image, threshold, max_corners)
@@ -876,6 +877,7 @@ def _(
     	_display = mo.vstack([plt.gcf(), mo.md("\n".join(_lines))])
     except Exception as error:
     	image_2_corners_full = image_2_corners_pyramid = None
+    	error.print_exc()
     	_display = mo.md(f"Problem 3(b) is not ready: {error}")
     _display
     return image_2_corners_full, image_2_corners_pyramid
@@ -896,7 +898,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 3(b).**
 
-    _Double-click this cell to write your answer. You may replace everything here._
+    The two approaches are ultimately very similar (especially at lower sigma values), but they differ as sigma increases. Downsampling tends to capture more points with fairly high accuracy (although with some extra noise in the positions); in fact, method (i) tends to miss obvious corners at higher sigma values, while method (ii) doesn't. Yet, method (ii) does tend to overcount corners at higher sigma values. Additionally, the Median R value is higher for method (ii) than for method (i) (ESPECIALLY as sigma increases), which helps explain why method (ii) performs better at higher sigma values (more values cross the threshold). The corner locations are fairly consistent accross methods, but method (ii) seems to be a little bit noiser in its corner locations.
     """)
     return
 
@@ -930,7 +932,7 @@ def effective_sigma(factor, sigma):
 	import numpy as np
 
 	# EDIT BELOW
-	sigma_eff = ...
+	sigma_eff = np.sqrt(factor**2 + (factor*sigma)**2)
 
 	return sigma_eff
 
@@ -945,19 +947,41 @@ def _(mo):
     return
 
 
-@app.function
-def pyramid_extrema(levels, factors, sigmas, method="log"):
-	"""Return (row, column, factor, sigma_eff) for the extrema of every level and scale."""
-	import numpy as np
+@app.cell
+def pyramid_extrema(dog_response, log_response):
+    def pyramid_extrema(levels, factors, sigmas, method="log"):
+    	"""Return (row, column, factor, sigma_eff) for the extrema of every level and scale."""
+    	import numpy as np
 
-	extrema = []
-	# EDIT BELOW
+    	extrema = []
+    	# EDIT BELOW
 
-	return np.asarray(extrema, dtype=float).reshape(-1, 4)
+    	for i in range(len(levels)):
+    		image = 255 - levels[i]
+
+    		for sigma in sigmas:
+    			response = log_response(image, sigma) if method == "log" else dog_response(image, sigma)
+
+    			extrema += [(y, x, factors[i], effective_sigma(factors[i], sigma)) for y, x in local_extrema(response)]
+
+    	if len(extrema) == 0:
+    		return np.empty(shape=(0, 4), dtype=float)
+
+    	return np.asarray(extrema, dtype=float).reshape(-1, 4)
+
+    return (pyramid_extrema,)
 
 
 @app.cell(hide_code=True)
-def _(image_2, image_2_levels, mo, plt, pyramid_error, sigmas):
+def _(
+    image_2,
+    image_2_levels,
+    mo,
+    plt,
+    pyramid_error,
+    pyramid_extrema,
+    sigmas,
+):
     try:
     	if pyramid_error:
     		raise RuntimeError(pyramid_error)
@@ -983,6 +1007,7 @@ def _(image_2, image_2_levels, mo, plt, pyramid_error, sigmas):
     	_display = _figure
     except Exception as error:
     	image_2_blobs = None
+    	error.print_exc()
     	_display = mo.md(f"Problem 3(c) is not ready: {error}")
     _display
     return (image_2_blobs,)
@@ -1005,8 +1030,11 @@ def to_original(points, factor):
 	"""Map (row, column) points in a level downsampled by factor to the original image."""
 	import numpy as np
 
+	if len(points) == 0:
+		return np.empty(shape=(0,2), dtype=float)
+
 	# EDIT BELOW
-	mapped = ...
+	mapped = np.asarray(points, dtype=float) * factor
 
 	return mapped
 

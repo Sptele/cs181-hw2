@@ -535,13 +535,16 @@ def harris_corners(convolve2d_full, np, sobel_x, sobel_y):
 
 
     	rtnr = []
+    	margin = 2
 
-    	for i in range(s_x.shape[0]):
-    		for j in range(s_x.shape[1]):
+    	for i in range(margin, s_x.shape[0]-margin):
+    		for j in range(margin, s_x.shape[1]-margin):
     			R = (Sx2[i,j]*Sy2[i,j]-Sxy[i,j]**2) - k*((Sx2[i,j]+Sy2[i,j])**2)
 		   
     			if R >= threshold:
     				rtnr.append((R, i, j))
+
+    	if len(rtnr) == 0: return np.asarray([])
 
     	rtnr.sort(reverse=True)
 
