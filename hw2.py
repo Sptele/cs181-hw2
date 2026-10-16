@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.25.1"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -61,7 +61,7 @@ def _():
     laplacian = hw1_definitions["laplacian"]
     convolve2d_full = hw1_definitions["convolve2d_full"]
     harris_corners = hw1_definitions["harris_corners"]
-    return (convolve2d_full,)
+    return convolve2d_full, harris_corners
 
 
 @app.cell(hide_code=True)
@@ -166,16 +166,17 @@ def classify_feature(math):
     	e1: float = (tr + math.sqrt(disc))/2
     	e2: float = (tr - math.sqrt(disc))/2
 
-    	if e1 < 0 or e2 < 0:
-    		return "invalid"
-    	elif e1 > threshold and e2 > threshold:
-    		return "corner"
-    	elif e1 > threshold or e2 > threshold:
-    		return "edge"
-    	elif e1 <= threshold and e2 <= threshold:
-    		return "flat"
+    	emax = max(e1, e2)
+    	emin = min(e1, e2)
 
-    	return "flat"
+    	if emax < 0 or emin < 0:
+    		return "invalid"
+    	elif emax < threshold:
+    		return "flat"
+    	elif emin < threshold:
+    		return "edge"
+    	else:
+    		return "corner"
 
     return (classify_feature,)
 
@@ -225,7 +226,7 @@ def make_square_image(np):
     	is the top-left pixel of a square and side is its side length.
     	"""
     	# EDIT BELOW: set the pixels of image.
-    	image = np.full((size, size), 255, dtype=float)
+    	image = np.full((size, size), 255, dtype=np.uint8)
 
     	for j, i, l in squares:
     		for ki in range(l):
@@ -299,7 +300,7 @@ def gaussian_kernel_1d(math):
         """Return the normalized 1D Gaussian kernel of radius ceil(3 * sigma)."""
         import numpy as np
 
-        def g(x): return math.exp(-((x**2)/(2*(sigma**2))))/(sigma*math.sqrt(2*math.pi))
+        def g(x): return math.exp(-((x**2)/(2*(sigma**2))))
 
         k_radius = math.ceil(3*sigma)
         k_len = 2*k_radius+1
@@ -333,10 +334,9 @@ def gaussian_kernel_2d(gaussian_kernel_1d):
     	# EDIT BELOW: construct the 2D kernel from your 1D Gaussian kernel.
     	kernel = np.outer(g, g) # are we allowed to use this?
 
+    	return kernel / kernel.sum() # ? don't normalize
 
-    	return kernel / kernel.sum()
-
-    return (gaussian_kernel_2d,)
+    return
 
 
 @app.cell(hide_code=True)
@@ -377,12 +377,12 @@ def _(mo):
 
 
 @app.cell
-def gaussian_smooth(gaussian_kernel_2d):
+def gaussian_smooth(gaussian_kernel_1d):
     def gaussian_smooth(image, sigma):
     	"""Return image smoothed by a 2D Gaussian of standard deviation sigma."""
     	# EDIT BELOW: smooth with gaussian_kernel_1d and convolve_same.
 
-    	g = gaussian_kernel_2d(sigma)
+    	g = gaussian_kernel_1d(sigma)
 
     	smoothed = convolve_same(image, g)
 
@@ -427,7 +427,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 2(b).**
 
-    Convolving with a 1D kernel twice is faster because it
+    Convolving with a 1D kernel twice is faster because it only does 2k operations per pixel, as opposed to a 2D convolution that does k^2 operations per pixel. In a 2D convolution, each pixel is accumulated as a weighted sum of its k^2-1 neighbors, while in a 1D convolution, it's a weighted sum of only its k-1 neighbors. Convolving twice will only require 2k operations per pixel, which is obviously faster.
     """)
     return
 
@@ -539,56 +539,39 @@ def _(mo):
 
 @app.function
 # EDIT BELOW: choose a default fraction between 0 and 1.
-def local_extrema(response, fraction=0.1):
+def local_extrema(response, fraction=0.40):
 	"""Return (row, column) locations of the strong local extrema of response."""
 	import numpy as np
 
-	magnitude = np.abs(np.asarray(response, dtype=float))
+	if len(response) == 0:
+		return np.empty((0,2), dtype=int)
+
+	magnitude = np.abs(np.asarray(response, dtype=np.float64))
 	extrema = []
 
-	def neighbor_check(i, j, max):
-		curr = magnitude[i, j]
+	imtopdog = magnitude.max()
 
-		for ki in [-1, 0, 1]:
-			for kj in [-1, 0, 1]:
-				if ki == 0 and kj == 0: continue
+	for i in range(1, magnitude.shape[0]-1):
+		for j in range(1, magnitude.shape[1]-1):
+			curr =	 magnitude[i, j]
 
-				t = magnitude[i+kj, j+kj]
+			if curr == 0: continue
 
+			p = curr >= fraction*imtopdog
 
-				if abs(curr - t) <= (10**-9 * max): continue
-				if curr < t: return False
+			if p:
+				for ki in [-1, 0, 1]:
+					for kj in [-1, 0, 1]:
+						if ki == 0 and kj == 0: continue
 
-		return True
+						t = magnitude[i+ki, j+kj]
 
-	imtopdog = 0
+						if curr >= t or abs(curr - t) <= (1e-9 * imtopdog): continue
 
-	def magnitude_check(i, j, imtopdog):	
-		p = False
+						p = False
 
-		if magnitude[i, j] > imtopdog:
-			imtopdog = magnitude[i, j]
-			p = True
-
-		if magnitude[i, j] >= fraction*imtopdog:
-			p = True
-		
-		return (p, imtopdog)
-
-	for i in range(magnitude.shape[0]-2):
-		for j in range(magnitude.shape[1]-2):
-
-			reali = i+1
-			realj = j+1
-
-			if not neighbor_check(reali, realj, imtopdog): continue
-
-			magpass, newmax = magnitude_check(reali, realj, imtopdog)
-			imtopdog = newmax
-
-			if not magpass: continue
-
-			extrema.append((reali, realj))
+			if p:
+				extrema.append((i, j))
 
 	if len(extrema) == 0:
 		return np.empty((0,2), dtype=int)
@@ -637,17 +620,32 @@ def _(mo):
     return
 
 
-@app.function
-def dog_response(image, sigma, k=1.4):
-	"""Return the Difference of Gaussian response of image at scale sigma."""
-	# EDIT BELOW
-	response = ...
+@app.cell
+def dog_response(gaussian_smooth):
+    def dog_response(image, sigma, k=1.4):
+    	"""Return the Difference of Gaussian response of image at scale sigma."""
+    	# EDIT BELOW
+    	ksig = gaussian_smooth(image, k*sigma)
+    	sig = gaussian_smooth(image, sigma)
 
-	return response
+    	response = ksig - sig
+	
+    	return response
+
+    return (dog_response,)
 
 
 @app.cell(hide_code=True)
-def _(image_1, log_by_sigma, mo, np, plt, sigmas, smoothing_error):
+def _(
+    dog_response,
+    image_1,
+    log_by_sigma,
+    mo,
+    np,
+    plt,
+    sigmas,
+    smoothing_error,
+):
     try:
     	if smoothing_error:
     		raise RuntimeError(smoothing_error)
@@ -669,6 +667,7 @@ def _(image_1, log_by_sigma, mo, np, plt, sigmas, smoothing_error):
     	_figure.tight_layout()
     	_display = _figure
     except Exception as error:
+    	error.print_exc()
     	_display = mo.md(f"Problem 2(e) is not ready: {error}")
     _display
     return
@@ -691,7 +690,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 2(e).**
 
-    _Double-click this cell to write your answer. You may replace everything here._
+    While DoG is fairly close to LoG in terms of the number of returned extrema, it misses several extrema as sigma increases. At sigma=8, for example, DoG misses 20 points that LoG found. The missed extrema are because DoG is an approximation of LoG, which means that it does not exactly match LoG's accuracy and is in fact slightly less accurate. As such, as more blur is applied, this inaccuracy compounds and leads to exponentially more misses.
     """)
     return
 
@@ -714,11 +713,8 @@ def _(mo):
 def downsample(image, factor):
 	"""Keep every factor-th row and column of image, starting at [0, 0]."""
 	import numpy as np
-
-	# EDIT BELOW
-	sampled = ...
-
-	return sampled
+	
+	return image[::factor, ::factor]
 
 
 @app.cell(hide_code=True)
@@ -729,18 +725,25 @@ def _(mo):
     return
 
 
-@app.function
-def build_scale_pyramid(image, sigmas):
-	"""Return (smoothed, levels): full-resolution and downsampled images per sigma."""
-	# EDIT BELOW
-	smoothed = ...
-	levels = ...
+@app.cell
+def build_scale_pyramid(gaussian_smooth, np):
+    def build_scale_pyramid(image, sigmas):
+    	"""Return (smoothed, levels): full-resolution and downsampled images per sigma."""
+    	# EDIT BELOW
+    	smoothed = np.empty(len(sigmas), dtype=object)
+    	levels = np.empty(shape=len(sigmas), dtype=object)
 
-	return smoothed, levels
+    	for i in range(len(sigmas)):
+    		smoothed[i] = gaussian_smooth(image, sigmas[i])
+    		levels[i] = downsample(smoothed[i], int(sigmas[i]))
+
+    	return smoothed, levels
+
+    return (build_scale_pyramid,)
 
 
 @app.cell(hide_code=True)
-def _(image_2, mo, plt, sigmas):
+def _(build_scale_pyramid, image_2, mo, plt, sigmas):
     try:
     	image_2_smoothed, image_2_levels = build_scale_pyramid(image_2, sigmas)
     	pyramid_error = None
@@ -760,6 +763,7 @@ def _(image_2, mo, plt, sigmas):
     except Exception as error:
     	image_2_smoothed = image_2_levels = None
     	pyramid_error = str(error)
+    	error.print_exc()
     	_display = mo.md(f"Problem 3(a) is not ready: {error}")
     _display
     return image_2_levels, image_2_smoothed, pyramid_error
@@ -780,7 +784,7 @@ def _(mo):
     mo.md(r"""
     **Your answer to 3(a).**
 
-    _Double-click this cell to write your answer. You may replace everything here._
+    As we increment the level, the edges & corners blur; blur compounds on previous blur to have exponentially more blur. Specifically, the blur seems to be aliased and very pixelated, which is likely due to the downsampling skipping rows & columns.
     """)
     return
 
@@ -800,18 +804,22 @@ def _(mo):
     return
 
 
-@app.function
-def image_2_corners(image, threshold=..., max_corners=...):
-	"""Return the Harris corners of a smoothed Image 2 or pyramid level as (row, column)."""
-	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
-	corners = ...
+@app.cell
+def image_2_corners(harris_corners):
+    def image_2_corners(image, threshold=.45, max_corners=40):
+    	"""Return the Harris corners of a smoothed Image 2 or pyramid level as (row, column)."""
+    	# EDIT BELOW: call your hw1 harris_corners function using threshold and max_corners.
+    	corners = harris_corners(image, threshold, max_corners)
 
-	return corners
+    	return corners
+
+    return (image_2_corners,)
 
 
 @app.cell(hide_code=True)
 def _(
     convolve2d_full,
+    image_2_corners,
     image_2_levels,
     image_2_smoothed,
     mo,

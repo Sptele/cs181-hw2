@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.25.1"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -220,7 +220,6 @@ def _(np):
 
     	output = np.empty(output_shape, dtype=float)
 
-
     	x_offsets = range(-((kernel.shape[1]-1)//2), kernel.shape[1] - (kernel.shape[1]-1)//2)
     	x_offset = -x_offsets[0]
 
@@ -406,17 +405,18 @@ def build_laplacian_pyramid(np):
     		scale = rvr[idx+1].shape[0] // rvr[idx].shape[0]
 
     		gp = rvr[idx]
-    		new_size = gp.shape[0]*scale
+    		new_size = rvr[idx+1].shape[0]
     		o = np.zeros((new_size, new_size), dtype=float)        
 
-    		for i in range(0, new_size, scale):
-    			for j in range(0, new_size, scale):
-    				o[i, j] = gp[i//scale, j//scale]
+    		# for i in range(0, new_size, scale):
+    		# 	for j in range(0, new_size, scale):
+    		# 		o[i, j] = gp[i//scale, j//scale]
+    		o[::scale, ::scale] = gp
 
-    		for i in range(new_size):
-    			for j in range(new_size):
-    				o[i, j] = rvr[idx+1][i, j] - o[i, j]
-    		pyramid.append(o)
+    		# for i in range(new_size):
+    		# 	for j in range(new_size):
+    		# 		o[i, j] = rvr[idx+1][i, j] - o[i, j]
+    		pyramid.append(rvr[idx+1]-o)
 
     	rtnr = pyramid[::-1]
     	rtnr.append(rvr[0])
